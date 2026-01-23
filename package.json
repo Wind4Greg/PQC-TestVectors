@@ -1,0 +1,12 @@
+{
+  "type": "module",
+  "dependencies": {
+    "@noble/curves": "^2.0.1",
+    "@noble/hashes": "^2.0.1",
+    "canonicalize": "^2.1.0",
+    "deep-equal": "^2.2.3",
+    "jsonld": "^9.0.0",
+    "multiformats": "^13.4.2",
+    "varint": "^6.0.0"
+  }
+}
