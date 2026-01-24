@@ -13,7 +13,12 @@ import { base58btc } from "multiformats/bases/base58";
 import { p256 as P256} from '@noble/curves/nist.js';
 import { sha256 } from '@noble/hashes/sha2.js';
 import * as utils from '@noble/hashes/utils.js';
-const { bytesToHex, concatBytes, equalBytes, hexToBytes } = utils;
+const { bytesToHex, hexToBytes } = utils;
+import { proofConfig, transform, hashing } from './DIUtils.js';
+
+// General scheme parameters
+const canonScheme = "rdfc";
+const hash = "sha256";
 
 // const dirsAndFiles = {
 //   outputDir: './output/ecdsa-rdfc-2019-p256/',
@@ -49,45 +54,33 @@ let document = JSON.parse(
 // Signed Document Creation Steps:
 
 // Canonize the document
-let cannon = await jsonld.canonize(document);
+let docCannon = await transform(document, canonScheme);
 console.log("Canonized unsigned document:")
-console.log(cannon);
-writeFile(baseDir + 'canonDocECDSAP256.txt', cannon);
+console.log(docCannon);
+writeFile(baseDir + 'canonDocECDSAP256.txt', docCannon);
 
-
-// Hash canonized document
-const encoder = new TextEncoder();
-let docHash = sha256(encoder.encode(cannon)); // Use encoder to conver to Uint8Array
-console.log("Hash of canonized document in hex:")
-console.log(bytesToHex(docHash));
-writeFile(baseDir + 'docHashECDSAP256.txt', bytesToHex(docHash));
 
 // Set proof options per draft
-let proofConfig = {};
-proofConfig.type = "DataIntegrityProof";
-proofConfig.cryptosuite = "ecdsa-rdfc-2019";
-proofConfig.created = "2023-02-24T23:36:38Z";
-// proofConfig.verificationMethod = "https://vc.example/issuers/5678#" + keyPair.publicKeyMultibase;
-proofConfig.verificationMethod = 'did:key:' + keyPair.publicKeyMultibase + '#'
+let proofOptions = {};
+proofOptions.type = "DataIntegrityProof";
+proofOptions.cryptosuite = "ecdsa-rdfc-2019";
+proofOptions.created = "2023-02-24T23:36:38Z";
+// proofOptions.verificationMethod = "https://vc.example/issuers/5678#" + keyPair.publicKeyMultibase;
+proofOptions.verificationMethod = 'did:key:' + keyPair.publicKeyMultibase + '#'
   + keyPair.publicKeyMultibase;
-proofConfig.proofPurpose = "assertionMethod";
-proofConfig["@context"] = document["@context"]; // Missing from draft!!!
-writeFile(baseDir + 'proofConfigECDSAP256.json', JSON.stringify(proofConfig, null, 2));
+proofOptions.proofPurpose = "assertionMethod";
+proofOptions["@context"] = document["@context"]; // Missing from draft!!!
+console.log(proofOptions);
+writeFile(baseDir + 'proofOptionsECDSAP256.json', JSON.stringify(proofOptions, null, 2));
 
 // canonize the proof config
-let proofCanon = await jsonld.canonize(proofConfig);
+let proofCanon = await proofConfig(proofOptions, canonScheme);
 console.log("Proof Configuration Canonized:");
 console.log(proofCanon);
 writeFile(baseDir + 'proofCanonECDSAP256.txt', proofCanon);
 
-// Hash canonized proof config
-let proofHash = sha256(encoder.encode(proofCanon)); // @noble/hash will convert string to bytes via UTF-8
-console.log("Hash of canonized proof in hex:")
-console.log(bytesToHex(proofHash));
-writeFile(baseDir + 'proofHashECDSAP256.txt', bytesToHex(proofHash));
-
 // Combine hashes
-let combinedHash = concatBytes(proofHash, docHash);
+let combinedHash = hashing(docCannon, proofCanon, hash);
 writeFile(baseDir + 'combinedHashECDSAP256.txt', bytesToHex(combinedHash));
 
 // Sign
@@ -109,8 +102,8 @@ console.log(`Signature verified: ${result}`);
 
 // Construct Signed Document
 let signedDocument = Object.assign({}, document);
-delete proofConfig['@context'];
-signedDocument.proof = proofConfig;
+delete proofOptions['@context'];
+signedDocument.proof = proofOptions;
 signedDocument.proof.proofValue = base58btc.encode(signature);
 
 console.log(JSON.stringify(signedDocument, null, 2));
