@@ -1,79 +1,72 @@
 /*
-    Note updated for using newer noble/curve library.
-
-    Steps to verify a signed verifiable credential in the *DataIntegrityProof*
-    representation with a "ecdsa-secp256r1-2019" cryptosuite. Run this after
-    ECDSAP256Create.js or modify to read in
-    a signed file of your choice. Caveat: No error checking is performed.
-    Caveat 2: This is prior to a spec!
+  Example verifying ECDSA test vectors using general processing functions.
 */
 import { readFile } from 'fs/promises';
-import { localLoader } from './documentLoader.js';
-import jsonld from 'jsonld';
 import { base58btc } from "multiformats/bases/base58";
-import { p256 as P256} from '@noble/curves/nist.js';
+import { p256 as P256 } from '@noble/curves/nist.js';
 import { sha256 } from '@noble/hashes/sha2.js';
 import * as utils from '@noble/hashes/utils.js';
-const { bytesToHex, concatBytes, equalBytes, hexToBytes } = utils;
+const { bytesToHex} = utils;
+import { proofConfig, transform, hashing } from './DIUtils.js';
 
-// const baseDir = "./output/ecdsa-rdfc-2019-p256/";
-const baseDir = "./output/ecdsa-rdfc-2019-p256/employ/";
+const hash = "sha256";
 
-jsonld.documentLoader = localLoader;
+const tests = [
+  {
+    baseDir: "./output/ecdsa-rdfc-2019-p256/alumni/",
+    canonScheme: "rdfc",
+  },
+  {
+    baseDir: "./output/ecdsa-jcs-2019-p256/alumni/",
+    canonScheme: "jcs",
+  },
+]
 
-// Read signed input document from a file or just specify it right here.
-const signedDocument = JSON.parse(
+for (let testParams of tests) {
+
+  // Read signed input document from a file or just specify it right here.
+  const signedDocument = JSON.parse(
     await readFile(
-      new URL(baseDir + 'signedECDSAP256.json', import.meta.url)
+      new URL(testParams.baseDir + 'signedECDSAP256.json', import.meta.url)
     )
   );
 
-// Document without proof
-let document = Object.assign({}, signedDocument);
-delete document.proof;
-console.log(document);
+  // Document without proof
+  let document = Object.assign({}, signedDocument);
+  delete document.proof;
+  // console.log(document);
 
-// Canonize the document
-let cannon = await jsonld.canonize(document);
-console.log("Canonized unsigned document:")
-console.log(cannon);
+  // Canonize the document
+  let cannon = await transform(document, testParams.canonScheme);
 
-// Hash canonized document
-const encoder = new TextEncoder();
-let docHash = sha256(encoder.encode(cannon)); // @noble/hash will convert string to bytes via UTF-8
-console.log("Hash of canonized document in hex:")
-console.log(bytesToHex(docHash));
+  // Set proof options per draft
+  let proofOptions = {};
+  proofOptions.type = signedDocument.proof.type;
+  proofOptions.cryptosuite = signedDocument.proof.cryptosuite;
+  proofOptions.created = signedDocument.proof.created;
+  proofOptions.verificationMethod = signedDocument.proof.verificationMethod;
+  proofOptions.proofPurpose = signedDocument.proof.proofPurpose;
+  proofOptions["@context"] = signedDocument["@context"]; // Missing from draft!!!
 
-// Set proof options per draft
-let proofConfig = {};
-proofConfig.type = signedDocument.proof.type;
-proofConfig.cryptosuite = signedDocument.proof.cryptosuite;
-proofConfig.created = signedDocument.proof.created;
-proofConfig.verificationMethod = signedDocument.proof.verificationMethod;
-proofConfig.proofPurpose = signedDocument.proof.proofPurpose;
-proofConfig["@context"] = signedDocument["@context"]; // Missing from draft!!!
+  // canonize the proof config
+  let proofCanon = await proofConfig(proofOptions, testParams.canonScheme);
+  // console.log("Proof Configuration Canonized:");
+  // console.log(proofCanon);
 
-// canonize the proof config
-let proofCanon = await jsonld.canonize(proofConfig);
-console.log("Proof Configuration Canonized:");
-console.log(proofCanon);
 
-// Hash canonized proof config
-let proofHash = sha256(encoder.encode(proofCanon)); // @noble/hash will convert string to bytes via UTF-8
-console.log("Hash of canonized proof in hex:")
-console.log(bytesToHex(proofHash));
+  // Hashing
+  let combinedHash = hashing(cannon, proofCanon, hash);
 
-// Combine hashes
-let combinedHash = concatBytes(proofHash, docHash); // Hash order different from draft
+  // Get public key
+  let encodedPbk = signedDocument.proof.verificationMethod.split("#")[1];
+  let pbk = base58btc.decode(encodedPbk);
+  pbk = pbk.slice(2, pbk.length); // First two bytes are multi-format indicator
+  console.log(`Public Key hex: ${bytesToHex(pbk)}, Length: ${pbk.length}`);
 
-// Get public key
-let encodedPbk = signedDocument.proof.verificationMethod.split("#")[1];
-let pbk = base58btc.decode(encodedPbk);
-pbk = pbk.slice(2, pbk.length); // First two bytes are multi-format indicator
-console.log(`Public Key hex: ${bytesToHex(pbk)}, Length: ${pbk.length}`);
-
-// Verify
-let msgHash = sha256(combinedHash); // Hash is done outside of the algorithm in noble/curve case.
-let signature = base58btc.decode(signedDocument.proof.proofValue);
-let result = P256.verify(signature, msgHash, pbk, { prehash: false, lowS: false });
-console.log(`Signature verified: ${result}`);
+  // Verify
+  let msgHash = sha256(combinedHash); // Hash is done outside of the algorithm in noble/curve case.
+  let signature = base58btc.decode(signedDocument.proof.proofValue);
+  let result = P256.verify(signature, msgHash, pbk, { prehash: false, lowS: false });
+  console.log(`File: ${testParams.baseDir + 'signedECDSAP256.json'}:`)
+  console.log(`Signature verified: ${result}`);
+}

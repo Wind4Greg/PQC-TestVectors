@@ -7,8 +7,6 @@
 */
 
 import { mkdir, readFile, writeFile } from 'fs/promises';
-import jsonld from 'jsonld';
-import { localLoader } from './documentLoader.js';
 import { base58btc } from "multiformats/bases/base58";
 import { p256 as P256} from '@noble/curves/nist.js';
 import { sha256 } from '@noble/hashes/sha2.js';
@@ -20,21 +18,16 @@ import { proofConfig, transform, hashing } from './DIUtils.js';
 const canonScheme = "rdfc";
 const hash = "sha256";
 
-// const dirsAndFiles = {
-//   outputDir: './output/ecdsa-rdfc-2019-p256/',
-//   inputFile: './input/unsigned.json'
-// }
 
 const dirsAndFiles = {
   outputDir: './output/ecdsa-rdfc-2019-p256/employ/',
-  inputFile: './input/employmentAuth.json'
+  inputFile: './input/employmentAuth.json',
+  proofOptionsFile: './input/proofOptions.json'
 }
 
 // Create output directory for the results
 const baseDir = dirsAndFiles.outputDir;
 let status = await mkdir(baseDir, {recursive: true});
-
-jsonld.documentLoader = localLoader; // Local loader for JSON-LD
 
 const keyPair = {
     publicKeyMultibase: "zDnaepBuvsQ8cpsWrVKw8fbpGpvPeNSjVPTWoq6cRqaYzBKVP"
@@ -53,33 +46,31 @@ let document = JSON.parse(
 
 // Signed Document Creation Steps:
 
-// Canonize the document
+// Transform the document
 let docCannon = await transform(document, canonScheme);
-console.log("Canonized unsigned document:")
-console.log(docCannon);
-writeFile(baseDir + 'canonDocECDSAP256.txt', docCannon);
+writeFile(baseDir + 'transformDocECDSAP256.txt', docCannon);
 
 
-// Set proof options per draft
-let proofOptions = {};
-proofOptions.type = "DataIntegrityProof";
+// Set proof options
+let proofOptions = JSON.parse(
+    await readFile(
+      new URL(dirsAndFiles.proofOptionsFile, import.meta.url)
+    )
+  );
+// Must specify cryptosuite
 proofOptions.cryptosuite = "ecdsa-rdfc-2019";
-proofOptions.created = "2023-02-24T23:36:38Z";
-// proofOptions.verificationMethod = "https://vc.example/issuers/5678#" + keyPair.publicKeyMultibase;
+// Must provide verification methods related to public key
 proofOptions.verificationMethod = 'did:key:' + keyPair.publicKeyMultibase + '#'
   + keyPair.publicKeyMultibase;
-proofOptions.proofPurpose = "assertionMethod";
-proofOptions["@context"] = document["@context"]; // Missing from draft!!!
-console.log(proofOptions);
-writeFile(baseDir + 'proofOptionsECDSAP256.json', JSON.stringify(proofOptions, null, 2));
 
-// canonize the proof config
+proofOptions["@context"] = document["@context"];
+// Proof Configuration
 let proofCanon = await proofConfig(proofOptions, canonScheme);
 console.log("Proof Configuration Canonized:");
 console.log(proofCanon);
 writeFile(baseDir + 'proofCanonECDSAP256.txt', proofCanon);
 
-// Combine hashes
+// Hashing
 let combinedHash = hashing(docCannon, proofCanon, hash);
 writeFile(baseDir + 'combinedHashECDSAP256.txt', bytesToHex(combinedHash));
 
