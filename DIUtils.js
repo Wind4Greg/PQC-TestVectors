@@ -11,6 +11,7 @@ const { bytesToHex, concatBytes, equalBytes, hexToBytes } = utils;
 
 jsonld.documentLoader = localLoader; // Local loader for JSON-LD
 
+// TODO: for non SHA-256 case RDFC needs hash info...
 export async function proofConfig(proofOptions, canonScheme="rdfc") {
     let proofCanon;
     switch (canonScheme) {

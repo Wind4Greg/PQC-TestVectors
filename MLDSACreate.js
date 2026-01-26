@@ -8,8 +8,6 @@
 
 import { mkdir, readFile, writeFile } from 'fs/promises';
 import { base58btc } from "multiformats/bases/base58";
-import { p256 as P256} from '@noble/curves/nist.js';
-import { sha256 } from '@noble/hashes/sha2.js';
 import * as utils from '@noble/hashes/utils.js';
 const { bytesToHex, hexToBytes } = utils;
 import { proofConfig, transform, hashing } from './DIUtils.js';
