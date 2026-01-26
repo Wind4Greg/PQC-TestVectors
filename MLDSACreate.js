@@ -1,9 +1,22 @@
 /*
-    **TODO**: Update this for PQC and generalized processing
+ML-DSA test vector generation for both RDFC, JCS and multiple security strengths.
 
+FIPS 204 info:
 
-    Steps to create a signed verifiable credential with an *EcdsaSecp256r1Signature2019*
-    based on "DataIntegrityProof" representation. This has not be specified in a draft yet.
+| Name     | Private Key | Public Key | Signature Size | Sec Strength |
+|----------|-------------|------------|----------------|--------------|
+|ML-DSA-44 | 2528        | 1312       | 2420           | Category 2   |
+|ML-DSA-65 | 4000        | 1952       | 3293           | Category 3   |
+|ML-DSA-87 | 4864        | 2592       | 4595           | Category 5   |
+
+Hash collision resistance strength:
+
+| Sec Strength | Hash Function |
+|--------------|---------------|
+| Cat 1 or 2   | SHA-256       |
+| Cat 3 or 4   | SHA-384       |
+| Cat 5        | SHA-512       |
+
 */
 
 import { mkdir, readFile, writeFile } from 'fs/promises';
@@ -51,7 +64,7 @@ let document = JSON.parse(
 // Signed Document Creation Steps:
 
 // Transform the document
-let docCannon = await transform(document, canonScheme);
+let docCannon = await transform(document, canonScheme, hash);
 writeFile(baseDir + 'transformDocMLDSA44.txt', docCannon);
 
 
@@ -69,7 +82,7 @@ proofOptions.verificationMethod = 'did:key:' + publicKeyMultibase + '#'
 
 proofOptions["@context"] = document["@context"];
 // Proof Configuration
-let proofCanon = await proofConfig(proofOptions, canonScheme);
+let proofCanon = await proofConfig(proofOptions, canonScheme, hash);
 console.log("Proof Configuration Canonized:");
 // console.log(proofCanon);
 writeFile(baseDir + 'proofCanonMLDSA44.txt', proofCanon);
