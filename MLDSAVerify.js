@@ -18,7 +18,7 @@ const hash = "sha256";
 // Read signed input document from a file or just specify it right here.
 const signedDocument = JSON.parse(
     await readFile(
-      new URL(baseDir + 'signedMLDSA44.json', import.meta.url)
+      new URL(baseDir + 'signedmldsa44.json', import.meta.url)
     )
   );
 
