@@ -1,0 +1,17 @@
+{
+  "slh128s": {
+    "publicKeyHex": "66a085a1ac35ab7fe90e57cbc395b24cc83c700f4663bed95b41adfa0687e0ac",
+    "secretKeyHex": "e7420b1c9b746c413160699d45c78057493db52c28330de26438eeabc7674f1766a085a1ac35ab7fe90e57cbc395b24cc83c700f4663bed95b41adfa0687e0ac",
+    "publicKeyMultibase": "z4cyUYUmjJJmRsV3wFdapdWq81fGfgMUqdCkRPKkz34cj62X"
+  },
+  "slh192s": {
+    "publicKeyHex": "f3b977605cbf691328cf17bf9aa814c917170a4f7fa45dd62c641990c001c81f3d986e5de30151d2590c76e4daefa37b",
+    "secretKeyHex": "e9da835c319ee4431e4020c043c859d67189c442fe6591b197c20df613fb53b03854853ad239bd83a1c79ac7a4671d74f3b977605cbf691328cf17bf9aa814c917170a4f7fa45dd62c641990c001c81f3d986e5de30151d2590c76e4daefa37b",
+    "publicKeyMultibase": "z32JZsRKyjwDinfV3iHnbcn55FftJSfDYjstiN65cp9C5s7M4JD9TEq9REHDrXFgs3TMBx"
+  },
+  "slh256s": {
+    "publicKeyHex": "aef7975e4ffffbfe096c43cd81aea46d979217e48cefc2dc76d9f0f01fd4cdc0e3d7bad3c0050fe72c16689d0e1c9323fa3f019c901df93e4afa36dbea240925",
+    "secretKeyHex": "7477b2c693f000db21294894947559beebc61a2110451dd6a2069fd48b402727cdc96130aaecc44c532fd70be596f644dfbe3b0076dec0f5a0ede071481354ecaef7975e4ffffbfe096c43cd81aea46d979217e48cefc2dc76d9f0f01fd4cdc0e3d7bad3c0050fe72c16689d0e1c9323fa3f019c901df93e4afa36dbea240925",
+    "publicKeyMultibase": "z28VWt2TyXxKeTPW5bY44XSrMvLmW6vDtKq2MPdobTUAPSQeZPXiU27YNbSk5N2y4RwHz1JmsfavsdYRFx8RQ9yYoj3i"
+  }
+}

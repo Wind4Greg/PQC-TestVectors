@@ -1,8 +1,16 @@
 # Test Vector Generation for Quantum Safe Data Integrity
 
+This repository contains code to generate test vectors for the [Quantum-Safe Cryptosuites](https://w3c-ccg.github.io/di-quantum-safe/) Draft Community Report.
+
+## Use
+
+After cloning this repo and running `npm install`. You can then must run one of the *Create.js files prior to running the corresponding *Verify.js file. Test vectors will be place in a `./output` directory.
+
 ## Generic Functions
 
-General Non-SD approach
+To reduce the number of test vectors for reasonable coverage we will use the functional refactoring suggested in [di-quantum-safe Issue #9](https://github.com/w3c-ccg/di-quantum-safe/issues/9).
+
+Note: This is early in the development cycle.
 
 1. High Level Algorithms (would write for each signature type, e.g., ML-DSA, SLH-DSA but not each flavor)
    1. **Create Proof(signature and parameters)**

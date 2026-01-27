@@ -1,55 +1,55 @@
 /*
-    ML-DSA Verification
+    SLH-DSA Verification
 
 */
 import { readFile } from 'fs/promises';
 import { base58btc } from "multiformats/bases/base58";
-import { ml_dsa44, ml_dsa65, ml_dsa87 } from '@noble/post-quantum/ml-dsa.js';
+import { slh_dsa_sha2_128s, slh_dsa_sha2_192s, slh_dsa_sha2_256s } from '@noble/post-quantum/slh-dsa.js';
 import { base64url } from 'multiformats/bases/base64'
 import { proofConfig, transform, hashing } from './DIUtils.js';
 
 let testCases = [
   {
-    cryptosuite: "mldsa44-rdfc-2024",
-    sigFunc: ml_dsa44,
+    cryptosuite: "slhdsa128-rdfc-2024",
+    sigFunc: slh_dsa_sha2_128s,
     cannonScheme: "rdfc",
     hash: "sha256",
-    signedDoc: './output/mldsa44-rdfc-2024/alumni/signedMLDSA44.json',
+    signedDoc: './output/slhdsa128-rdfc-2024/alumni/signedSLH128S.json'
   },
   {
-    cryptosuite: "mldsa44-jcs-2024",
-    sigFunc: ml_dsa44,
+    cryptosuite: "slhdsa128-jcs-2024",
+    sigFunc: slh_dsa_sha2_128s,
     cannonScheme: "jcs",
     hash: "sha256",
-    signedDoc: './output/mldsa44-jcs-2024/alumni/signedMLDSA44.json',
+    signedDoc: './output/slhdsa128-jcs-2024/alumni/signedSLH128S.json'
   },
   {
-    cryptosuite: "mldsa65-rdfc-2024",
-    sigFunc: ml_dsa65,
+    cryptosuite: "slhdsa192-rdfc-2024",
+    sigFunc: slh_dsa_sha2_192s,
     cannonScheme: "rdfc",
     hash: "sha384",
-    signedDoc: './output/mldsa65-rdfc-2024/alumni/signedMLDSA65.json',
+    signedDoc: './output/slhdsa192-rdfc-2024/alumni/signedSLH192S.json',
   },
   {
-    cryptosuite: "mldsa65-jcs-2024",
-    sigFunc: ml_dsa65,
+    cryptosuite: "slhdsa192-jcs-2024",
+    sigFunc: slh_dsa_sha2_192s,
     cannonScheme: "jcs",
     hash: "sha384",
-    signedDoc: './output/mldsa65-jcs-2024/alumni/signedMLDSA65.json',
+    signedDoc: './output/slhdsa192-jcs-2024/alumni/signedSLH192S.json',
   },
   {
-    cryptosuite: "mldsa87-rdfc-2024",
-    sigFunc: ml_dsa87,
+    cryptosuite: "slhdsa256-rdfc-2024",
+    sigFunc: slh_dsa_sha2_256s,
     cannonScheme: "rdfc",
     hash: "sha512",
-    signedDoc: './output/mldsa87-rdfc-2024/alumni/signedMLDSA87.json',
+    signedDoc: './output/slhdsa256-rdfc-2024/alumni/signedSLH256S.json',
   },
   {
-    cryptosuite: "mldsa87-jcs-2024",
-    sigFunc: ml_dsa87,
+    cryptosuite: "slhdsa256-jcs-2024",
+    sigFunc: slh_dsa_sha2_256s,
     cannonScheme: "jcs",
     hash: "sha512",
-    signedDoc: './output/mldsa87-jcs-2024/alumni/signedMLDSA87.json',
+    signedDoc: './output/slhdsa256-jcs-2024/alumni/signedSLH256S.json',
   },
 ];
 
@@ -64,12 +64,10 @@ for (let testCase of testCases) {
   // Document without proof
   let document = Object.assign({}, signedDocument);
   delete document.proof;
-  // console.log(document);
 
   // Transform the document
   let docCanon = await transform(document, testCase.canonScheme);
   // console.log("Canonized unsigned document:")
-  // console.log(docCanon);
 
   // Set proof options per draft
   let proofOptions = {};
@@ -78,12 +76,10 @@ for (let testCase of testCases) {
   proofOptions.created = signedDocument.proof.created;
   proofOptions.verificationMethod = signedDocument.proof.verificationMethod;
   proofOptions.proofPurpose = signedDocument.proof.proofPurpose;
-  proofOptions["@context"] = signedDocument["@context"]; // Missing from draft!!!
+  proofOptions["@context"] = signedDocument["@context"];
 
   // proof config
   let proofCanon = await proofConfig(proofOptions, testCase.canonScheme);
-  // console.log("Proof Configuration Canonized:");
-  // console.log(proofCanon);
 
   // Hashing
   let combinedHash = hashing(docCanon, proofCanon, testCase.hash);
@@ -92,7 +88,6 @@ for (let testCase of testCases) {
   let encodedPbk = signedDocument.proof.verificationMethod.split("#")[1];
   let pbk = base58btc.decode(encodedPbk);
   pbk = pbk.slice(2, pbk.length); // First two bytes are multi-format indicator
-  // console.log(`Public Key hex: ${bytesToHex(pbk)}, Length: ${pbk.length}`);
 
   // Verify
   let signature = base64url.decode(signedDocument.proof.proofValue);

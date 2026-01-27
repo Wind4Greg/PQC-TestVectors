@@ -1,13 +1,13 @@
 /*
-ML-DSA test vector generation for both RDFC, JCS and multiple security strengths.
+SLH-DSA test vector generation for both RDFC, JCS and multiple security strengths.
 
-FIPS 204 info:
+FIPS 205 info:
 
-| Name     | Private Key | Public Key | Signature Size | Sec Strength |
-|----------|-------------|------------|----------------|--------------|
-|ML-DSA-44 | 2528        | 1312       | 2420           | Category 2   |
-|ML-DSA-65 | 4000        | 1952       | 3293           | Category 3   |
-|ML-DSA-87 | 4864        | 2592       | 4595           | Category 5   |
+| Name             | Private Key | Public Key | Signature Size | Sec Strength |
+|------------------|-------------|------------|----------------|--------------|
+|SLH-DSA-SHA2-128s |   64        | 32         | 7856           | Category 1   |
+|SLH-DSA-SHA2-192s |   96        | 48         | 16224          | Category 3   |
+|SLH-DSA-SHA2-256s |   128       | 64         | 29792          | Category 5   |
 
 Hash collision resistance strength:
 
@@ -24,75 +24,75 @@ import { base58btc } from "multiformats/bases/base58";
 import * as utils from '@noble/hashes/utils.js';
 const { bytesToHex, hexToBytes } = utils;
 import { proofConfig, transform, hashing } from './DIUtils.js';
-import { ml_dsa44, ml_dsa65, ml_dsa87 } from '@noble/post-quantum/ml-dsa.js';
+import { slh_dsa_sha2_128s, slh_dsa_sha2_192s, slh_dsa_sha2_256s } from '@noble/post-quantum/slh-dsa.js';
 import { base64url } from 'multiformats/bases/base64'
 
 let testCases = [
   {
-    cryptosuite: "mldsa44-rdfc-2024",
-    sigFunc: ml_dsa44,
+    cryptosuite: "slhdsa128-rdfc-2024",
+    sigFunc: slh_dsa_sha2_128s,
     cannonScheme: "rdfc",
     hash: "sha256",
-    outputDir: './output/mldsa44-rdfc-2024/alumni/',
+    outputDir: './output/slhdsa128-rdfc-2024/alumni/',
     inputFile: './input/unsigned.json',
     proofOptionsFile: './input/proofOptions.json',
-    keyFile: './input/KeysMLDSA.json',
-    keyType: "mldsa44"
+    keyFile: './input/KeysSLHDSA.json',
+    keyType: "slh128s"
   },
   {
-    cryptosuite: "mldsa44-jcs-2024",
-    sigFunc: ml_dsa44,
+    cryptosuite: "slhdsa128-jcs-2024",
+    sigFunc: slh_dsa_sha2_128s,
     cannonScheme: "jcs",
     hash: "sha256",
-    outputDir: './output/mldsa44-jcs-2024/alumni/',
+    outputDir: './output/slhdsa128-jcs-2024/alumni/',
     inputFile: './input/unsigned.json',
     proofOptionsFile: './input/proofOptions.json',
-    keyFile: './input/KeysMLDSA.json',
-    keyType: "mldsa44"
-  },
-    {
-    cryptosuite: "mldsa65-rdfc-2024",
-    sigFunc: ml_dsa65,
-    cannonScheme: "rdfc",
-    hash: "sha384",
-    outputDir: './output/mldsa65-rdfc-2024/alumni/',
-    inputFile: './input/unsigned.json',
-    proofOptionsFile: './input/proofOptions.json',
-    keyFile: './input/KeysMLDSA.json',
-    keyType: "mldsa65"
+    keyFile: './input/KeysSLHDSA.json',
+    keyType: "slh128s"
   },
   {
-    cryptosuite: "mldsa65-jcs-2024",
-    sigFunc: ml_dsa65,
-    cannonScheme: "jcs",
-    hash: "sha384",
-    outputDir: './output/mldsa65-jcs-2024/alumni/',
-    inputFile: './input/unsigned.json',
-    proofOptionsFile: './input/proofOptions.json',
-    keyFile: './input/KeysMLDSA.json',
-    keyType: "mldsa65"
-  },
-      {
-    cryptosuite: "mldsa87-rdfc-2024",
-    sigFunc: ml_dsa87,
+    cryptosuite: "slhdsa192-rdfc-2024",
+    sigFunc: slh_dsa_sha2_192s,
     cannonScheme: "rdfc",
-    hash: "sha512",
-    outputDir: './output/mldsa87-rdfc-2024/alumni/',
+    hash: "sha384",
+    outputDir: './output/slhdsa192-rdfc-2024/alumni/',
     inputFile: './input/unsigned.json',
     proofOptionsFile: './input/proofOptions.json',
-    keyFile: './input/KeysMLDSA.json',
-    keyType: "mldsa87"
+    keyFile: './input/KeysSLHDSA.json',
+    keyType: "slh192s"
   },
   {
-    cryptosuite: "mldsa87-jcs-2024",
-    sigFunc: ml_dsa87,
+    cryptosuite: "slhdsa192-jcs-2024",
+    sigFunc: slh_dsa_sha2_192s,
     cannonScheme: "jcs",
-    hash: "sha512",
-    outputDir: './output/mldsa87-jcs-2024/alumni/',
+    hash: "sha384",
+    outputDir: './output/slhdsa192-jcs-2024/alumni/',
     inputFile: './input/unsigned.json',
     proofOptionsFile: './input/proofOptions.json',
-    keyFile: './input/KeysMLDSA.json',
-    keyType: "mldsa87"
+    keyFile: './input/KeysSLHDSA.json',
+    keyType: "slh192s"
+  },
+  {
+    cryptosuite: "slhdsa256-rdfc-2024",
+    sigFunc: slh_dsa_sha2_256s,
+    cannonScheme: "rdfc",
+    hash: "sha512",
+    outputDir: './output/slhdsa256-rdfc-2024/alumni/',
+    inputFile: './input/unsigned.json',
+    proofOptionsFile: './input/proofOptions.json',
+    keyFile: './input/KeysSLHDSA.json',
+    keyType: "slh256s"
+  },
+  {
+    cryptosuite: "slhdsa256-jcs-2024",
+    sigFunc: slh_dsa_sha2_256s,
+    cannonScheme: "jcs",
+    hash: "sha512",
+    outputDir: './output/slhdsa256-jcs-2024/alumni/',
+    inputFile: './input/unsigned.json',
+    proofOptionsFile: './input/proofOptions.json',
+    keyFile: './input/KeysSLHDSA.json',
+    keyType: "slh256s"
   },
 ]
 
@@ -101,7 +101,6 @@ for (let testCase of testCases) {
   const baseDir = testCase.outputDir;
   let status = await mkdir(baseDir, { recursive: true });
 
-  // TODO MLDSA44 keys
   let allKeys = JSON.parse(
     await readFile(
       new URL(testCase.keyFile, import.meta.url)
@@ -138,15 +137,17 @@ for (let testCase of testCases) {
   proofOptions["@context"] = document["@context"];
   // Proof Configuration
   let proofCanon = await proofConfig(proofOptions, testCase.canonScheme, testCase.hash);
-  console.log("Proof Configuration Canonized:");
 
   // Hashing
   let combinedHash = hashing(docCannon, proofCanon, testCase.hash);
 
   // Sign
+  console.log(`Signing for test case ${testCase.cryptosuite}`);
   let signature = testCase.sigFunc.sign(combinedHash, secretKey);
   writeFile(baseDir + 'sigHex' + testCase.keyType.toUpperCase() + '.txt', bytesToHex(signature));
+  console.log("Computed Signature from private key:");
   writeFile(baseDir + 'sigBase64url' + testCase.keyType.toUpperCase() + '.txt', base64url.encode(signature));
+
   // Verify (just to see we have a good private/public pair)
   let pbk = base58btc.decode(publicKeyMultibase);
   pbk = pbk.slice(2, pbk.length); // First two bytes are multi-format indicator
@@ -159,5 +160,7 @@ for (let testCase of testCases) {
   delete proofOptions['@context'];
   signedDocument.proof = proofOptions;
   signedDocument.proof.proofValue = base64url.encode(signature);
+
+  // console.log(JSON.stringify(signedDocument, null, 2));
   writeFile(baseDir + 'signed' + testCase.keyType.toUpperCase() + '.json', JSON.stringify(signedDocument, null, 2));
 }
