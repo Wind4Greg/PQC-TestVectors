@@ -27,14 +27,16 @@ import { proofConfig, transform, hashing } from './DIUtils.js';
 import { ml_dsa44, ml_dsa65, ml_dsa87 } from '@noble/post-quantum/ml-dsa.js';
 import { base64url } from 'multiformats/bases/base64'
 
+const commonAlgDir = './output/commonAlgs/';
+
 let testCases = [
   {
     cryptosuite: "mldsa44-rdfc-2024",
     sigFunc: ml_dsa44,
-    cannonScheme: "rdfc",
+    canonScheme: "rdfc",
     hash: "sha256",
     outputDir: './output/mldsa44-rdfc-2024/alumni/',
-    inputFile: './input/unsigned.json',
+    inputFile: './input/employmentAuth.json',
     proofOptionsFile: './input/proofOptions.json',
     keyFile: './input/KeysMLDSA.json',
     keyType: "mldsa44"
@@ -42,7 +44,7 @@ let testCases = [
   {
     cryptosuite: "mldsa44-jcs-2024",
     sigFunc: ml_dsa44,
-    cannonScheme: "jcs",
+    canonScheme: "jcs",
     hash: "sha256",
     outputDir: './output/mldsa44-jcs-2024/alumni/',
     inputFile: './input/unsigned.json',
@@ -53,10 +55,10 @@ let testCases = [
     {
     cryptosuite: "mldsa65-rdfc-2024",
     sigFunc: ml_dsa65,
-    cannonScheme: "rdfc",
+    canonScheme: "rdfc",
     hash: "sha384",
     outputDir: './output/mldsa65-rdfc-2024/alumni/',
-    inputFile: './input/unsigned.json',
+    inputFile: './input/employmentAuth.json',
     proofOptionsFile: './input/proofOptions.json',
     keyFile: './input/KeysMLDSA.json',
     keyType: "mldsa65"
@@ -64,7 +66,7 @@ let testCases = [
   {
     cryptosuite: "mldsa65-jcs-2024",
     sigFunc: ml_dsa65,
-    cannonScheme: "jcs",
+    canonScheme: "jcs",
     hash: "sha384",
     outputDir: './output/mldsa65-jcs-2024/alumni/',
     inputFile: './input/unsigned.json',
@@ -75,10 +77,10 @@ let testCases = [
       {
     cryptosuite: "mldsa87-rdfc-2024",
     sigFunc: ml_dsa87,
-    cannonScheme: "rdfc",
+    canonScheme: "rdfc",
     hash: "sha512",
     outputDir: './output/mldsa87-rdfc-2024/alumni/',
-    inputFile: './input/unsigned.json',
+    inputFile: './input/employmentAuth.json',
     proofOptionsFile: './input/proofOptions.json',
     keyFile: './input/KeysMLDSA.json',
     keyType: "mldsa87"
@@ -86,7 +88,7 @@ let testCases = [
   {
     cryptosuite: "mldsa87-jcs-2024",
     sigFunc: ml_dsa87,
-    cannonScheme: "jcs",
+    canonScheme: "jcs",
     hash: "sha512",
     outputDir: './output/mldsa87-jcs-2024/alumni/',
     inputFile: './input/unsigned.json',
@@ -100,8 +102,8 @@ for (let testCase of testCases) {
   // Create output directory for the results
   const baseDir = testCase.outputDir;
   let status = await mkdir(baseDir, { recursive: true });
+  status = await mkdir(commonAlgDir, { recursive: true});
 
-  // TODO MLDSA44 keys
   let allKeys = JSON.parse(
     await readFile(
       new URL(testCase.keyFile, import.meta.url)
@@ -121,8 +123,10 @@ for (let testCase of testCases) {
   // Signed Document Creation Steps:
 
   // Transform the document
-  let docCannon = await transform(document, testCase.canonScheme, testCase.hash);
-
+  let docCanon = await transform(document, testCase.canonScheme, testCase.hash);
+  // write to commonAlg output
+  let fileName = commonAlgDir + 'transform' + testCase.canonScheme + testCase.hash + testCase.keyType.toUpperCase() + '.txt';
+  writeFile(fileName, docCanon);
   // Set proof options
   let proofOptions = JSON.parse(
     await readFile(
@@ -138,10 +142,12 @@ for (let testCase of testCases) {
   proofOptions["@context"] = document["@context"];
   // Proof Configuration
   let proofCanon = await proofConfig(proofOptions, testCase.canonScheme, testCase.hash);
-  console.log("Proof Configuration Canonized:");
+  // write to commonAlg output
+  fileName = commonAlgDir + 'proofConfig' + testCase.canonScheme + testCase.hash + testCase.keyType.toUpperCase() + '.txt';
+  writeFile(fileName, proofCanon);
 
   // Hashing
-  let combinedHash = hashing(docCannon, proofCanon, testCase.hash);
+  let combinedHash = hashing(docCanon, proofCanon, testCase.hash);
 
   // Sign
   let signature = testCase.sigFunc.sign(combinedHash, secretKey);

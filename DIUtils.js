@@ -16,8 +16,14 @@ export async function proofConfig(proofOptions, canonScheme = "rdfc", hash = "sh
     let proofCanon;
     switch (canonScheme) {
         case "rdfc":
-            let canonOptions = createCanonOptions(hash);
-            proofCanon = await jsonld.canonize(proofOptions, canonOptions);
+                let canonOptions = {
+                algorithm: "RDFC-1.0",
+                messageDigestAlgorithm: hash,
+                maxWorkFactor: 1,
+                maxDeepIterations: -1,
+                signal: null
+            };
+            proofCanon = await jsonld.canonize(proofOptions, { messageDigestAlgorithm: hash });
             return proofCanon;
         case "jcs":
             proofCanon = canonicalize(proofOptions);
@@ -27,11 +33,17 @@ export async function proofConfig(proofOptions, canonScheme = "rdfc", hash = "sh
     }
 }
 
-export async function transform(document, canonScheme = "rdfc", hash="sha256") {
+export async function transform(document, canonScheme = "rdfc", hash = "sha256") {
     let docCanon;
     switch (canonScheme) {
         case "rdfc":
-            let canonOptions = createCanonOptions(hash);
+            let canonOptions = {
+                algorithm: "RDFC-1.0",
+                messageDigestAlgorithm: hash,
+                maxWorkFactor: 1,
+                maxDeepIterations: -1,
+                signal: null
+            };
             docCanon = await jsonld.canonize(document, canonOptions);
             return docCanon;
         case "jcs":
@@ -65,35 +77,39 @@ export function hashing(transformedDocument, canonicalProofConfig, hash = "sha25
 }
 
 // Create canon options for JSON-LD canonicalization based on hash function.
-function createCanonOptions(canonScheme) {
-    class MessageDigest {
-        constructor() {
-            switch (canonScheme) {
-            case "sha256":
-                this.md.sha256.create();
-                break;
-            case "sha384":
-                this.md = sha384.create();
-                break;
-            case "sha512":
-                this.md = sha512.create();
-                break;
-            default:
-                throw new Error("Unsupported hash function");
-            }
-        }
-        update(msg) {
-            this.md.update(msg)
-        }
-        digest() {
-            return bytesToHex(this.md.digest())
-        }
-    };
-    const canonOptions = {
-        algorithm: 'URDNA2015',
-        format: 'application/n-quads', createMessageDigest: () => new MessageDigest()
-    }
-
-    // let cannon = await jsonld.canonize(document, canonOptions);
-    return canonOptions;
-}
+// function createCanonOptions(hashName) {
+//     console.log(hashName);
+//     class MessageDigest {
+//         constructor() {
+//             console.log("constructor called");
+//             switch (hashName) {
+//                 case "sha256":
+//                     this.md = sha256.create();
+//                     break;
+//                 case "sha384":
+//                     this.md = sha384.create();
+//                     break;
+//                 case "sha512":
+//                     this.md = sha512.create();
+//                     break;
+//                 default:
+//                     throw new Error("Unsupported hash function");
+//             }
+//         }
+//         update(msg) {
+//             console.log("update called");
+//             this.md.update(msg)
+//         }
+//         digest() {
+//             console.log("digest called");
+//             return bytesToHex(this.md.digest())
+//         }
+//     };
+//     let canonOptions = {
+//         algorithm: 'URDNA2015',
+//         format: 'application/n-quads',
+//         // createMessageDigest: () => new MessageDigest()
+//         messageDigestAlgorithm: hashName
+//     }
+//     return canonOptions;
+// }
