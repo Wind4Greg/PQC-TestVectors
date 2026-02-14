@@ -35,7 +35,7 @@ let testCases = [
     sigFunc: ml_dsa44,
     canonScheme: "rdfc",
     hash: "sha256",
-    outputDir: './output/mldsa44-rdfc-2024/alumni/',
+    outputDir: './output/mldsa44-rdfc-2024/',
     inputFile: './input/employmentAuth.json',
     proofOptionsFile: './input/proofOptions.json',
     keyFile: './input/KeysMLDSA.json',
@@ -46,8 +46,8 @@ let testCases = [
     sigFunc: ml_dsa44,
     canonScheme: "jcs",
     hash: "sha256",
-    outputDir: './output/mldsa44-jcs-2024/alumni/',
-    inputFile: './input/unsigned.json',
+    outputDir: './output/mldsa44-jcs-2024/',
+    inputFile: './input/employmentAuth.json',
     proofOptionsFile: './input/proofOptions.json',
     keyFile: './input/KeysMLDSA.json',
     keyType: "mldsa44"
@@ -57,7 +57,7 @@ let testCases = [
     sigFunc: ml_dsa65,
     canonScheme: "rdfc",
     hash: "sha384",
-    outputDir: './output/mldsa65-rdfc-2024/alumni/',
+    outputDir: './output/mldsa65-rdfc-2024/',
     inputFile: './input/employmentAuth.json',
     proofOptionsFile: './input/proofOptions.json',
     keyFile: './input/KeysMLDSA.json',
@@ -68,8 +68,8 @@ let testCases = [
     sigFunc: ml_dsa65,
     canonScheme: "jcs",
     hash: "sha384",
-    outputDir: './output/mldsa65-jcs-2024/alumni/',
-    inputFile: './input/unsigned.json',
+    outputDir: './output/mldsa65-jcs-2024/',
+    inputFile: './input/employmentAuth.json',
     proofOptionsFile: './input/proofOptions.json',
     keyFile: './input/KeysMLDSA.json',
     keyType: "mldsa65"
@@ -148,6 +148,9 @@ for (let testCase of testCases) {
 
   // Hashing
   let combinedHash = hashing(docCanon, proofCanon, testCase.hash);
+    // write to commonAlg output
+  fileName = commonAlgDir + 'hashing' + testCase.canonScheme + testCase.hash + testCase.keyType.toUpperCase() + '.txt';
+  writeFile(fileName, bytesToHex(combinedHash));
 
   // Sign
   let signature = testCase.sigFunc.sign(combinedHash, secretKey);
