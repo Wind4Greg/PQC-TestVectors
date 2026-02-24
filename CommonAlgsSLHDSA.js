@@ -1,21 +1,9 @@
 /*
-SLH-DSA test vector generation for both RDFC, JCS and multiple security strengths.
+Test vector generation for common algorithms: Proof Configuration, Transform,
+and Hashing.
 
-FIPS 205 info:
-
-| Name             | Private Key | Public Key | Signature Size | Sec Strength |
-|------------------|-------------|------------|----------------|--------------|
-|SLH-DSA-SHA2-128s |   64        | 32         | 7856           | Category 1   |
-|SLH-DSA-SHA2-192s |   96        | 48         | 16224          | Category 3   |
-|SLH-DSA-SHA2-256s |   128       | 64         | 29792          | Category 5   |
-
-Hash collision resistance strength:
-
-| Sec Strength | Hash Function |
-|--------------|---------------|
-| Cat 1 or 2   | SHA-256       |
-| Cat 3 or 4   | SHA-384       |
-| Cat 5        | SHA-512       |
+Since the cryptosuite name appears in the `proof options` the Proof Options and
+Hashing algorithms outputs are dependent on this.
 
 */
 
@@ -24,13 +12,13 @@ import { base58btc } from "multiformats/bases/base58";
 import * as utils from '@noble/hashes/utils.js';
 const { bytesToHex, hexToBytes } = utils;
 import { proofConfig, transform, hashing } from './DIUtils.js';
-import { slh_dsa_sha2_128s, slh_dsa_sha2_192s, slh_dsa_sha2_256s } from '@noble/post-quantum/slh-dsa.js';
-import { base64url } from 'multiformats/bases/base64'
+
+const commonAlgDir = './output/commonAlgs/';
+const allHashes = {};
 
 let testCases = [
   {
     cryptosuite: "slhdsa128-rdfc-2024",
-    sigFunc: slh_dsa_sha2_128s,
     cannonScheme: "rdfc",
     hash: "sha256",
     outputDir: './output/slhdsa128-rdfc-2024/alumni/',
@@ -41,7 +29,6 @@ let testCases = [
   },
   {
     cryptosuite: "slhdsa128-jcs-2024",
-    sigFunc: slh_dsa_sha2_128s,
     cannonScheme: "jcs",
     hash: "sha256",
     outputDir: './output/slhdsa128-jcs-2024/alumni/',
@@ -52,7 +39,6 @@ let testCases = [
   },
   {
     cryptosuite: "slhdsa192-rdfc-2024",
-    sigFunc: slh_dsa_sha2_192s,
     cannonScheme: "rdfc",
     hash: "sha384",
     outputDir: './output/slhdsa192-rdfc-2024/alumni/',
@@ -63,7 +49,6 @@ let testCases = [
   },
   {
     cryptosuite: "slhdsa192-jcs-2024",
-    sigFunc: slh_dsa_sha2_192s,
     cannonScheme: "jcs",
     hash: "sha384",
     outputDir: './output/slhdsa192-jcs-2024/alumni/',
@@ -74,7 +59,6 @@ let testCases = [
   },
   {
     cryptosuite: "slhdsa256-rdfc-2024",
-    sigFunc: slh_dsa_sha2_256s,
     cannonScheme: "rdfc",
     hash: "sha512",
     outputDir: './output/slhdsa256-rdfc-2024/alumni/',
@@ -85,7 +69,6 @@ let testCases = [
   },
   {
     cryptosuite: "slhdsa256-jcs-2024",
-    sigFunc: slh_dsa_sha2_256s,
     cannonScheme: "jcs",
     hash: "sha512",
     outputDir: './output/slhdsa256-jcs-2024/alumni/',
@@ -95,12 +78,12 @@ let testCases = [
     keyType: "slh256s"
   },
 ]
-let fileName;
 
 for (let testCase of testCases) {
   // Create output directory for the results
   const baseDir = testCase.outputDir;
   let status = await mkdir(baseDir, { recursive: true });
+  status = await mkdir(commonAlgDir, { recursive: true });
 
   let allKeys = JSON.parse(
     await readFile(
@@ -108,8 +91,6 @@ for (let testCase of testCases) {
     )
   );
   const publicKeyMultibase = allKeys[testCase.keyType].publicKeyMultibase;
-  let secretKey = hexToBytes(allKeys[testCase.keyType].secretKeyHex);
-  let publicKey = hexToBytes(allKeys[testCase.keyType].publicKeyHex);
 
   // Read input document from a file or just specify it right here.
   let document = JSON.parse(
@@ -118,11 +99,13 @@ for (let testCase of testCases) {
     )
   );
 
-  // Signed Document Creation Steps:
+  // Common Algorithms
 
   // Transform the document
-  let docCannon = await transform(document, testCase.canonScheme, testCase.hash);
-
+  let docCanon = await transform(document, testCase.canonScheme, testCase.hash);
+  // write to commonAlg output
+  let fileName = commonAlgDir + 'transform-' + testCase.canonScheme + '-' + testCase.hash + '.txt';
+  writeFile(fileName, docCanon);
   // Set proof options
   let proofOptions = JSON.parse(
     await readFile(
@@ -138,32 +121,14 @@ for (let testCase of testCases) {
   proofOptions["@context"] = document["@context"];
   // Proof Configuration
   let proofCanon = await proofConfig(proofOptions, testCase.canonScheme, testCase.hash);
+  // write to commonAlg output
+  fileName = commonAlgDir + 'proofConfig-' + testCase.cryptosuite + '.txt';
+  writeFile(fileName, proofCanon);
 
   // Hashing
-  let combinedHash = hashing(docCannon, proofCanon, testCase.hash);
-  // As a check against common algorithm test vector output
-  fileName = baseDir + 'hashing-' + testCase.cryptosuite + '.txt';
-  writeFile(fileName, bytesToHex(combinedHash));
-  // Sign
-  console.log(`Signing for test case ${testCase.cryptosuite}`);
-  let signature = testCase.sigFunc.sign(combinedHash, secretKey);
-  writeFile(baseDir + 'sigHex' + testCase.keyType.toUpperCase() + '.txt', bytesToHex(signature));
-  console.log("Computed Signature from private key:");
-  writeFile(baseDir + 'sigBase64url' + testCase.keyType.toUpperCase() + '.txt', base64url.encode(signature));
-
-  // Verify (just to see we have a good private/public pair)
-  let pbk = base58btc.decode(publicKeyMultibase);
-  pbk = pbk.slice(2, pbk.length); // First two bytes are multi-format indicator
-  // console.log(`Public Key hex: ${bytesToHex(pbk)}, Length: ${pbk.length}`);
-  let result = testCase.sigFunc.verify(signature, combinedHash, pbk);
-  console.log(`Signature verified: ${result}`);
-
-  // Construct Signed Document
-  let signedDocument = Object.assign({}, document);
-  delete proofOptions['@context'];
-  signedDocument.proof = proofOptions;
-  signedDocument.proof.proofValue = base64url.encode(signature);
-
-  // console.log(JSON.stringify(signedDocument, null, 2));
-  writeFile(baseDir + 'signed' + testCase.keyType.toUpperCase() + '.json', JSON.stringify(signedDocument, null, 2));
+  let combinedHash = hashing(docCanon, proofCanon, testCase.hash);
+  allHashes[testCase.cryptosuite] = bytesToHex(combinedHash);
+  // write to commonAlg output
 }
+let fileName = commonAlgDir + 'hashing-SLHDSA' + '.json';
+writeFile(fileName, JSON.stringify(allHashes, null, 2));

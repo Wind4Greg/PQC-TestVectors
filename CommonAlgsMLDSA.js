@@ -1,21 +1,9 @@
 /*
-ML-DSA test vector generation for both RDFC, JCS and multiple security strengths.
+Test vector generation for common algorithms: Proof Configuration, Transform,
+and Hashing.
 
-FIPS 204 info:
-
-| Name     | Private Key | Public Key | Signature Size | Sec Strength |
-|----------|-------------|------------|----------------|--------------|
-|ML-DSA-44 | 2528        | 1312       | 2420           | Category 2   |
-|ML-DSA-65 | 4000        | 1952       | 3293           | Category 3   |
-|ML-DSA-87 | 4864        | 2592       | 4595           | Category 5   |
-
-Hash collision resistance strength:
-
-| Sec Strength | Hash Function |
-|--------------|---------------|
-| Cat 1 or 2   | SHA-256       |
-| Cat 3 or 4   | SHA-384       |
-| Cat 5        | SHA-512       |
+Since the cryptosuite name appears in the `proof options` the Proof Options and
+Hashing algorithms outputs are dependent on this.
 
 */
 
@@ -24,13 +12,13 @@ import { base58btc } from "multiformats/bases/base58";
 import * as utils from '@noble/hashes/utils.js';
 const { bytesToHex, hexToBytes } = utils;
 import { proofConfig, transform, hashing } from './DIUtils.js';
-import { ml_dsa44, ml_dsa65, ml_dsa87 } from '@noble/post-quantum/ml-dsa.js';
-import { base64url } from 'multiformats/bases/base64'
+
+const commonAlgDir = './output/commonAlgs/';
+const allHashes = {};
 
 let testCases = [
   {
     cryptosuite: "mldsa44-rdfc-2024",
-    sigFunc: ml_dsa44,
     canonScheme: "rdfc",
     hash: "sha256",
     outputDir: './output/mldsa44-rdfc-2024/',
@@ -41,7 +29,6 @@ let testCases = [
   },
   {
     cryptosuite: "mldsa44-jcs-2024",
-    sigFunc: ml_dsa44,
     canonScheme: "jcs",
     hash: "sha256",
     outputDir: './output/mldsa44-jcs-2024/',
@@ -50,9 +37,8 @@ let testCases = [
     keyFile: './input/KeysMLDSA.json',
     keyType: "mldsa44"
   },
-    {
+  {
     cryptosuite: "mldsa65-rdfc-2024",
-    sigFunc: ml_dsa65,
     canonScheme: "rdfc",
     hash: "sha384",
     outputDir: './output/mldsa65-rdfc-2024/',
@@ -63,7 +49,6 @@ let testCases = [
   },
   {
     cryptosuite: "mldsa65-jcs-2024",
-    sigFunc: ml_dsa65,
     canonScheme: "jcs",
     hash: "sha384",
     outputDir: './output/mldsa65-jcs-2024/',
@@ -72,9 +57,8 @@ let testCases = [
     keyFile: './input/KeysMLDSA.json',
     keyType: "mldsa65"
   },
-      {
+  {
     cryptosuite: "mldsa87-rdfc-2024",
-    sigFunc: ml_dsa87,
     canonScheme: "rdfc",
     hash: "sha512",
     outputDir: './output/mldsa87-rdfc-2024/alumni/',
@@ -85,7 +69,6 @@ let testCases = [
   },
   {
     cryptosuite: "mldsa87-jcs-2024",
-    sigFunc: ml_dsa87,
     canonScheme: "jcs",
     hash: "sha512",
     outputDir: './output/mldsa87-jcs-2024/alumni/',
@@ -97,10 +80,10 @@ let testCases = [
 ]
 
 for (let testCase of testCases) {
-  let fileName;
   // Create output directory for the results
   const baseDir = testCase.outputDir;
   let status = await mkdir(baseDir, { recursive: true });
+  status = await mkdir(commonAlgDir, { recursive: true });
 
   let allKeys = JSON.parse(
     await readFile(
@@ -108,8 +91,6 @@ for (let testCase of testCases) {
     )
   );
   const publicKeyMultibase = allKeys[testCase.keyType].publicKeyMultibase;
-  let secretKey = hexToBytes(allKeys[testCase.keyType].secretKeyHex);
-  let publicKey = hexToBytes(allKeys[testCase.keyType].publicKeyHex);
 
   // Read input document from a file or just specify it right here.
   let document = JSON.parse(
@@ -118,10 +99,13 @@ for (let testCase of testCases) {
     )
   );
 
-  // Signed Document Creation Steps:
+  // Common Algorithms
 
   // Transform the document
   let docCanon = await transform(document, testCase.canonScheme, testCase.hash);
+  // write to commonAlg output
+  let fileName = commonAlgDir + 'transform-' + testCase.canonScheme + '-' + testCase.hash + '.txt';
+  writeFile(fileName, docCanon);
   // Set proof options
   let proofOptions = JSON.parse(
     await readFile(
@@ -137,28 +121,14 @@ for (let testCase of testCases) {
   proofOptions["@context"] = document["@context"];
   // Proof Configuration
   let proofCanon = await proofConfig(proofOptions, testCase.canonScheme, testCase.hash);
+  // write to commonAlg output
+  fileName = commonAlgDir + 'proofConfig-' + testCase.cryptosuite + '.txt';
+  writeFile(fileName, proofCanon);
 
   // Hashing
   let combinedHash = hashing(docCanon, proofCanon, testCase.hash);
-  // As a check against common algorithm test vector output
-  fileName = baseDir + 'hashing-' + testCase.cryptosuite + '.txt';
-  writeFile(fileName, bytesToHex(combinedHash));
-
-  // Sign
-  let signature = testCase.sigFunc.sign(combinedHash, secretKey);
-  writeFile(baseDir + 'sigHex' + testCase.keyType.toUpperCase() + '.txt', bytesToHex(signature));
-  writeFile(baseDir + 'sigBase64url' + testCase.keyType.toUpperCase() + '.txt', base64url.encode(signature));
-  // Verify (just to see we have a good private/public pair)
-  let pbk = base58btc.decode(publicKeyMultibase);
-  pbk = pbk.slice(2, pbk.length); // First two bytes are multi-format indicator
-  // console.log(`Public Key hex: ${bytesToHex(pbk)}, Length: ${pbk.length}`);
-  let result = testCase.sigFunc.verify(signature, combinedHash, pbk);
-  console.log(`Signature verified: ${result}`);
-
-  // Construct Signed Document
-  let signedDocument = Object.assign({}, document);
-  delete proofOptions['@context'];
-  signedDocument.proof = proofOptions;
-  signedDocument.proof.proofValue = base64url.encode(signature);
-  writeFile(baseDir + 'signed' + testCase.keyType.toUpperCase() + '.json', JSON.stringify(signedDocument, null, 2));
+  allHashes[testCase.cryptosuite] = bytesToHex(combinedHash);
+  // write to commonAlg output
 }
+let fileName = commonAlgDir + 'hashing-MLDSA' + '.json';
+writeFile(fileName, JSON.stringify(allHashes, null, 2));
