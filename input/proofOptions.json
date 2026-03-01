@@ -1,7 +1,7 @@
  {
     "type": "DataIntegrityProof",
-    "cryptosuite": "Must be specified",
+    "cryptosuite": "Crytosuite name to be specified here",
     "created": "2023-02-24T23:36:38Z",
-    "verificationMethod": "did for public key here",
+    "verificationMethod": "did:key value for issuer public key here",
     "proofPurpose": "assertionMethod"
  }
