@@ -21,7 +21,6 @@ import * as utils from "@noble/hashes/utils.js";
 const { bytesToHex, concatBytes, equalBytes, hexToBytes } = utils;
 import pkg from "varint";
 const { encode, decode } = pkg;
-import { base58btc } from "multiformats/bases/base58";
 import { base64url } from "multiformats/bases/base64";
 
 const prefixVarints = [
@@ -60,21 +59,21 @@ const allKeys = {
   mldsa44: {
     publicKeyHex: bytesToHex(keys44.publicKey),
     secretKeyHex: bytesToHex(keys44.secretKey),
-    publicKeyMultibase: base58btc.encode(
+    publicKeyMultibase: base64url.encode(
       concatBytes(BYTE_PRE_MLDSA_44, keys44.publicKey),
     ),
   },
   mldsa65: {
     publicKeyHex: bytesToHex(keys65.publicKey),
     secretKeyHex: bytesToHex(keys65.secretKey),
-    publicKeyMultibase: base58btc.encode(
+    publicKeyMultibase: base64url.encode(
       concatBytes(BYTE_PRE_MLDSA_65, keys65.publicKey),
     ),
   },
   mldsa87: {
     publicKeyHex: bytesToHex(keys87.publicKey),
     secretKeyHex: bytesToHex(keys87.secretKey),
-    publicKeyMultibase: base58btc.encode(
+    publicKeyMultibase: base64url.encode(
       concatBytes(BYTE_PRE_MLDSA_87, keys87.publicKey),
     ),
   },

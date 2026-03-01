@@ -20,7 +20,6 @@ Hash collision resistance strength:
 */
 
 import { mkdir, readFile, writeFile } from "fs/promises";
-import { base58btc } from "multiformats/bases/base58";
 import * as utils from "@noble/hashes/utils.js";
 const { bytesToHex, hexToBytes } = utils;
 import { proofConfig, transform, hashing } from "./DIUtils.js";
@@ -153,7 +152,7 @@ for (let testCase of testCases) {
   //   base64url.encode(signature),
   // );
   // Verify (just to see we have a good private/public pair)
-  let pbk = base58btc.decode(publicKeyMultibase);
+  let pbk = base64url.decode(publicKeyMultibase);
   pbk = pbk.slice(2, pbk.length); // First two bytes are multi-format indicator
   // console.log(`Public Key hex: ${bytesToHex(pbk)}, Length: ${pbk.length}`);
   let result = testCase.sigFunc.verify(signature, combinedHash, pbk);

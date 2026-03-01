@@ -92,7 +92,7 @@ for (let testCase of testCases) {
 
   // Get public key
   let encodedPbk = signedDocument.proof.verificationMethod.split("#")[1];
-  let pbk = base58btc.decode(encodedPbk);
+  let pbk = base64url.decode(encodedPbk);
   pbk = pbk.slice(2, pbk.length); // First two bytes are multi-format indicator
 
   // Verify
