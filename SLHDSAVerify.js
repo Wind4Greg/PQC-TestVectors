@@ -2,63 +2,65 @@
     SLH-DSA Verification
 
 */
-import { readFile } from 'fs/promises';
+import { readFile } from "fs/promises";
 import { base58btc } from "multiformats/bases/base58";
-import { slh_dsa_sha2_128s, slh_dsa_sha2_192s, slh_dsa_sha2_256s } from '@noble/post-quantum/slh-dsa.js';
-import { base64url } from 'multiformats/bases/base64'
-import { proofConfig, transform, hashing } from './DIUtils.js';
+import {
+  slh_dsa_sha2_128s,
+  slh_dsa_sha2_192s,
+  slh_dsa_sha2_256s,
+} from "@noble/post-quantum/slh-dsa.js";
+import { base64url } from "multiformats/bases/base64";
+import { proofConfig, transform, hashing } from "./DIUtils.js";
 
 let testCases = [
   {
     cryptosuite: "slhdsa128-rdfc-2024",
     sigFunc: slh_dsa_sha2_128s,
-    cannonScheme: "rdfc",
+    canonScheme: "rdfc",
     hash: "sha256",
-    signedDoc: './output/slhdsa128-rdfc-2024/alumni/signedSLH128S.json'
+    signedDoc: "./output/slhdsa128-rdfc-2024/signed-slhdsa128-rdfc-2024.json",
   },
   {
     cryptosuite: "slhdsa128-jcs-2024",
     sigFunc: slh_dsa_sha2_128s,
-    cannonScheme: "jcs",
+    canonScheme: "jcs",
     hash: "sha256",
-    signedDoc: './output/slhdsa128-jcs-2024/alumni/signedSLH128S.json'
+    signedDoc: "./output/slhdsa128-jcs-2024/signed-slhdsa128-jcs-2024.json",
   },
   {
     cryptosuite: "slhdsa192-rdfc-2024",
     sigFunc: slh_dsa_sha2_192s,
-    cannonScheme: "rdfc",
+    canonScheme: "rdfc",
     hash: "sha384",
-    signedDoc: './output/slhdsa192-rdfc-2024/alumni/signedSLH192S.json',
+    signedDoc: "./output/slhdsa192-rdfc-2024/signed-slhdsa192-rdfc-2024.json",
   },
   {
     cryptosuite: "slhdsa192-jcs-2024",
     sigFunc: slh_dsa_sha2_192s,
-    cannonScheme: "jcs",
+    canonScheme: "jcs",
     hash: "sha384",
-    signedDoc: './output/slhdsa192-jcs-2024/alumni/signedSLH192S.json',
+    signedDoc: "./output/slhdsa192-jcs-2024/signed-slhdsa192-jcs-2024.json",
   },
   {
     cryptosuite: "slhdsa256-rdfc-2024",
     sigFunc: slh_dsa_sha2_256s,
-    cannonScheme: "rdfc",
+    canonScheme: "rdfc",
     hash: "sha512",
-    signedDoc: './output/slhdsa256-rdfc-2024/alumni/signedSLH256S.json',
+    signedDoc: "./output/slhdsa256-rdfc-2024/signed-slhdsa256-rdfc-2024.json",
   },
   {
     cryptosuite: "slhdsa256-jcs-2024",
     sigFunc: slh_dsa_sha2_256s,
-    cannonScheme: "jcs",
+    canonScheme: "jcs",
     hash: "sha512",
-    signedDoc: './output/slhdsa256-jcs-2024/alumni/signedSLH256S.json',
+    signedDoc: "./output/slhdsa256-jcs-2024/signed-slhdsa256-jcs-2024.json",
   },
 ];
 
 for (let testCase of testCases) {
   // Read signed input document from a file or just specify it right here.
   const signedDocument = JSON.parse(
-    await readFile(
-      new URL(testCase.signedDoc, import.meta.url)
-    )
+    await readFile(new URL(testCase.signedDoc, import.meta.url)),
   );
 
   // Document without proof
@@ -66,7 +68,7 @@ for (let testCase of testCases) {
   delete document.proof;
 
   // Transform the document
-  let docCanon = await transform(document, testCase.canonScheme);
+  let docCanon = await transform(document, testCase.canonScheme, testCase.hash);
   // console.log("Canonized unsigned document:")
 
   // Set proof options per draft
@@ -79,7 +81,11 @@ for (let testCase of testCases) {
   proofOptions["@context"] = signedDocument["@context"];
 
   // proof config
-  let proofCanon = await proofConfig(proofOptions, testCase.canonScheme);
+  let proofCanon = await proofConfig(
+    proofOptions,
+    testCase.canonScheme,
+    testCase.hash,
+  );
 
   // Hashing
   let combinedHash = hashing(docCanon, proofCanon, testCase.hash);

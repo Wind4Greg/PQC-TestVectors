@@ -18,7 +18,7 @@ const allHashes = {};
 let testCases = [
   {
     cryptosuite: "slhdsa128-rdfc-2024",
-    cannonScheme: "rdfc",
+    canonScheme: "rdfc",
     hash: "sha256",
     outputDir: "./output/slhdsa128-rdfc-2024/alumni/",
     inputFile: "./input/unsigned.json",
@@ -28,7 +28,7 @@ let testCases = [
   },
   {
     cryptosuite: "slhdsa128-jcs-2024",
-    cannonScheme: "jcs",
+    canonScheme: "jcs",
     hash: "sha256",
     outputDir: "./output/slhdsa128-jcs-2024/alumni/",
     inputFile: "./input/unsigned.json",
@@ -38,7 +38,7 @@ let testCases = [
   },
   {
     cryptosuite: "slhdsa192-rdfc-2024",
-    cannonScheme: "rdfc",
+    canonScheme: "rdfc",
     hash: "sha384",
     outputDir: "./output/slhdsa192-rdfc-2024/alumni/",
     inputFile: "./input/unsigned.json",
@@ -48,7 +48,7 @@ let testCases = [
   },
   {
     cryptosuite: "slhdsa192-jcs-2024",
-    cannonScheme: "jcs",
+    canonScheme: "jcs",
     hash: "sha384",
     outputDir: "./output/slhdsa192-jcs-2024/alumni/",
     inputFile: "./input/unsigned.json",
@@ -58,7 +58,7 @@ let testCases = [
   },
   {
     cryptosuite: "slhdsa256-rdfc-2024",
-    cannonScheme: "rdfc",
+    canonScheme: "rdfc",
     hash: "sha512",
     outputDir: "./output/slhdsa256-rdfc-2024/alumni/",
     inputFile: "./input/unsigned.json",
@@ -68,7 +68,7 @@ let testCases = [
   },
   {
     cryptosuite: "slhdsa256-jcs-2024",
-    cannonScheme: "jcs",
+    canonScheme: "jcs",
     hash: "sha512",
     outputDir: "./output/slhdsa256-jcs-2024/alumni/",
     inputFile: "./input/unsigned.json",
