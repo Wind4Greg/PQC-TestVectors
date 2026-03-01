@@ -1,13 +1,13 @@
 /*
   Example verifying ECDSA test vectors using general processing functions.
 */
-import { readFile } from 'fs/promises';
+import { readFile } from "fs/promises";
 import { base58btc } from "multiformats/bases/base58";
-import { p256 as P256 } from '@noble/curves/nist.js';
-import { sha256 } from '@noble/hashes/sha2.js';
-import * as utils from '@noble/hashes/utils.js';
-const { bytesToHex} = utils;
-import { proofConfig, transform, hashing } from './DIUtils.js';
+import { p256 as P256 } from "@noble/curves/nist.js";
+import { sha256 } from "@noble/hashes/sha2.js";
+import * as utils from "@noble/hashes/utils.js";
+const { bytesToHex } = utils;
+import { proofConfig, transform, hashing } from "./DIUtils.js";
 
 const hash = "sha256";
 
@@ -20,15 +20,14 @@ const tests = [
     baseDir: "./output/ecdsa-jcs-2019-p256/alumni/",
     canonScheme: "jcs",
   },
-]
+];
 
 for (let testParams of tests) {
-
   // Read signed input document from a file or just specify it right here.
   const signedDocument = JSON.parse(
     await readFile(
-      new URL(testParams.baseDir + 'signedECDSAP256.json', import.meta.url)
-    )
+      new URL(testParams.baseDir + "signedECDSAP256.json", import.meta.url),
+    ),
   );
 
   // Document without proof
@@ -53,7 +52,6 @@ for (let testParams of tests) {
   // console.log("Proof Configuration Canonized:");
   // console.log(proofCanon);
 
-
   // Hashing
   let combinedHash = hashing(cannon, proofCanon, hash);
 
@@ -66,7 +64,10 @@ for (let testParams of tests) {
   // Verify
   let msgHash = sha256(combinedHash); // Hash is done outside of the algorithm in noble/curve case.
   let signature = base58btc.decode(signedDocument.proof.proofValue);
-  let result = P256.verify(signature, msgHash, pbk, { prehash: false, lowS: false });
-  console.log(`File: ${testParams.baseDir + 'signedECDSAP256.json'}:`)
+  let result = P256.verify(signature, msgHash, pbk, {
+    prehash: false,
+    lowS: false,
+  });
+  console.log(`File: ${testParams.baseDir + "signedECDSAP256.json"}:`);
   console.log(`Signature verified: ${result}`);
 }

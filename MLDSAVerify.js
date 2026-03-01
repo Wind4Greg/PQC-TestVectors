@@ -2,63 +2,62 @@
     ML-DSA Verification
 
 */
-import { readFile } from 'fs/promises';
+import { readFile } from "fs/promises";
 import { base58btc } from "multiformats/bases/base58";
-import { ml_dsa44, ml_dsa65, ml_dsa87 } from '@noble/post-quantum/ml-dsa.js';
-import { base64url } from 'multiformats/bases/base64'
-import { proofConfig, transform, hashing } from './DIUtils.js';
+import { ml_dsa44, ml_dsa65, ml_dsa87 } from "@noble/post-quantum/ml-dsa.js";
+import { base64url } from "multiformats/bases/base64";
+import { proofConfig, transform, hashing } from "./DIUtils.js";
+import { bytesToHex } from "@noble/hashes/utils.js";
 
 let testCases = [
   {
     cryptosuite: "mldsa44-rdfc-2024",
     sigFunc: ml_dsa44,
-    cannonScheme: "rdfc",
+    canonScheme: "rdfc",
     hash: "sha256",
-    signedDoc: './output/mldsa44-rdfc-2024/alumni/signedMLDSA44.json',
+    signedDoc: "./output/mldsa44-rdfc-2024/signed-mldsa44-rdfc-2024.json",
   },
   {
     cryptosuite: "mldsa44-jcs-2024",
     sigFunc: ml_dsa44,
-    cannonScheme: "jcs",
+    canonScheme: "jcs",
     hash: "sha256",
-    signedDoc: './output/mldsa44-jcs-2024/alumni/signedMLDSA44.json',
+    signedDoc: "./output/mldsa44-jcs-2024/signed-mldsa44-jcs-2024.json",
   },
   {
     cryptosuite: "mldsa65-rdfc-2024",
     sigFunc: ml_dsa65,
-    cannonScheme: "rdfc",
+    canonScheme: "rdfc",
     hash: "sha384",
-    signedDoc: './output/mldsa65-rdfc-2024/alumni/signedMLDSA65.json',
+    signedDoc: "./output/mldsa65-rdfc-2024/signed-mldsa65-rdfc-2024.json",
   },
   {
     cryptosuite: "mldsa65-jcs-2024",
     sigFunc: ml_dsa65,
-    cannonScheme: "jcs",
+    canonScheme: "jcs",
     hash: "sha384",
-    signedDoc: './output/mldsa65-jcs-2024/alumni/signedMLDSA65.json',
+    signedDoc: "./output/mldsa65-jcs-2024/signed-mldsa65-jcs-2024.json",
   },
   {
     cryptosuite: "mldsa87-rdfc-2024",
     sigFunc: ml_dsa87,
-    cannonScheme: "rdfc",
+    canonScheme: "rdfc",
     hash: "sha512",
-    signedDoc: './output/mldsa87-rdfc-2024/alumni/signedMLDSA87.json',
+    signedDoc: "./output/mldsa87-rdfc-2024/signed-mldsa87-rdfc-2024.json",
   },
   {
     cryptosuite: "mldsa87-jcs-2024",
     sigFunc: ml_dsa87,
-    cannonScheme: "jcs",
+    canonScheme: "jcs",
     hash: "sha512",
-    signedDoc: './output/mldsa87-jcs-2024/alumni/signedMLDSA87.json',
+    signedDoc: "./output/mldsa87-jcs-2024/signed-mldsa87-jcs-2024.json",
   },
 ];
 
 for (let testCase of testCases) {
   // Read signed input document from a file or just specify it right here.
   const signedDocument = JSON.parse(
-    await readFile(
-      new URL(testCase.signedDoc, import.meta.url)
-    )
+    await readFile(new URL(testCase.signedDoc, import.meta.url)),
   );
 
   // Document without proof
@@ -67,7 +66,7 @@ for (let testCase of testCases) {
   // console.log(document);
 
   // Transform the document
-  let docCanon = await transform(document, testCase.canonScheme);
+  let docCanon = await transform(document, testCase.canonScheme, testCase.hash);
   // console.log("Canonized unsigned document:")
   // console.log(docCanon);
 
@@ -78,7 +77,7 @@ for (let testCase of testCases) {
   proofOptions.created = signedDocument.proof.created;
   proofOptions.verificationMethod = signedDocument.proof.verificationMethod;
   proofOptions.proofPurpose = signedDocument.proof.proofPurpose;
-  proofOptions["@context"] = signedDocument["@context"]; // Missing from draft!!!
+  proofOptions["@context"] = signedDocument["@context"];
 
   // proof config
   let proofCanon = await proofConfig(proofOptions, testCase.canonScheme);
@@ -87,6 +86,9 @@ for (let testCase of testCases) {
 
   // Hashing
   let combinedHash = hashing(docCanon, proofCanon, testCase.hash);
+  // console.log(
+  //   `Test: ${testCase.cryptosuite}, combineHash: ${bytesToHex(combinedHash)}`,
+  // );
 
   // Get public key
   let encodedPbk = signedDocument.proof.verificationMethod.split("#")[1];

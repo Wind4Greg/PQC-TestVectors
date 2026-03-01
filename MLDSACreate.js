@@ -19,13 +19,13 @@ Hash collision resistance strength:
 
 */
 
-import { mkdir, readFile, writeFile } from 'fs/promises';
+import { mkdir, readFile, writeFile } from "fs/promises";
 import { base58btc } from "multiformats/bases/base58";
-import * as utils from '@noble/hashes/utils.js';
+import * as utils from "@noble/hashes/utils.js";
 const { bytesToHex, hexToBytes } = utils;
-import { proofConfig, transform, hashing } from './DIUtils.js';
-import { ml_dsa44, ml_dsa65, ml_dsa87 } from '@noble/post-quantum/ml-dsa.js';
-import { base64url } from 'multiformats/bases/base64'
+import { proofConfig, transform, hashing } from "./DIUtils.js";
+import { ml_dsa44, ml_dsa65, ml_dsa87 } from "@noble/post-quantum/ml-dsa.js";
+import { base64url } from "multiformats/bases/base64";
 
 let testCases = [
   {
@@ -33,68 +33,68 @@ let testCases = [
     sigFunc: ml_dsa44,
     canonScheme: "rdfc",
     hash: "sha256",
-    outputDir: './output/mldsa44-rdfc-2024/',
-    inputFile: './input/employmentAuth.json',
-    proofOptionsFile: './input/proofOptions.json',
-    keyFile: './input/KeysMLDSA.json',
-    keyType: "mldsa44"
+    outputDir: "./output/mldsa44-rdfc-2024/",
+    inputFile: "./input/employmentAuth.json",
+    proofOptionsFile: "./input/proofOptions.json",
+    keyFile: "./input/KeysMLDSA.json",
+    keyType: "mldsa44",
   },
   {
     cryptosuite: "mldsa44-jcs-2024",
     sigFunc: ml_dsa44,
     canonScheme: "jcs",
     hash: "sha256",
-    outputDir: './output/mldsa44-jcs-2024/',
-    inputFile: './input/employmentAuth.json',
-    proofOptionsFile: './input/proofOptions.json',
-    keyFile: './input/KeysMLDSA.json',
-    keyType: "mldsa44"
+    outputDir: "./output/mldsa44-jcs-2024/",
+    inputFile: "./input/employmentAuth.json",
+    proofOptionsFile: "./input/proofOptions.json",
+    keyFile: "./input/KeysMLDSA.json",
+    keyType: "mldsa44",
   },
-    {
+  {
     cryptosuite: "mldsa65-rdfc-2024",
     sigFunc: ml_dsa65,
     canonScheme: "rdfc",
     hash: "sha384",
-    outputDir: './output/mldsa65-rdfc-2024/',
-    inputFile: './input/employmentAuth.json',
-    proofOptionsFile: './input/proofOptions.json',
-    keyFile: './input/KeysMLDSA.json',
-    keyType: "mldsa65"
+    outputDir: "./output/mldsa65-rdfc-2024/",
+    inputFile: "./input/employmentAuth.json",
+    proofOptionsFile: "./input/proofOptions.json",
+    keyFile: "./input/KeysMLDSA.json",
+    keyType: "mldsa65",
   },
   {
     cryptosuite: "mldsa65-jcs-2024",
     sigFunc: ml_dsa65,
     canonScheme: "jcs",
     hash: "sha384",
-    outputDir: './output/mldsa65-jcs-2024/',
-    inputFile: './input/employmentAuth.json',
-    proofOptionsFile: './input/proofOptions.json',
-    keyFile: './input/KeysMLDSA.json',
-    keyType: "mldsa65"
+    outputDir: "./output/mldsa65-jcs-2024/",
+    inputFile: "./input/employmentAuth.json",
+    proofOptionsFile: "./input/proofOptions.json",
+    keyFile: "./input/KeysMLDSA.json",
+    keyType: "mldsa65",
   },
-      {
+  {
     cryptosuite: "mldsa87-rdfc-2024",
     sigFunc: ml_dsa87,
     canonScheme: "rdfc",
     hash: "sha512",
-    outputDir: './output/mldsa87-rdfc-2024/alumni/',
-    inputFile: './input/employmentAuth.json',
-    proofOptionsFile: './input/proofOptions.json',
-    keyFile: './input/KeysMLDSA.json',
-    keyType: "mldsa87"
+    outputDir: "./output/mldsa87-rdfc-2024/",
+    inputFile: "./input/employmentAuth.json",
+    proofOptionsFile: "./input/proofOptions.json",
+    keyFile: "./input/KeysMLDSA.json",
+    keyType: "mldsa87",
   },
   {
     cryptosuite: "mldsa87-jcs-2024",
     sigFunc: ml_dsa87,
     canonScheme: "jcs",
     hash: "sha512",
-    outputDir: './output/mldsa87-jcs-2024/alumni/',
-    inputFile: './input/unsigned.json',
-    proofOptionsFile: './input/proofOptions.json',
-    keyFile: './input/KeysMLDSA.json',
-    keyType: "mldsa87"
+    outputDir: "./output/mldsa87-jcs-2024/",
+    inputFile: "./input/unsigned.json",
+    proofOptionsFile: "./input/proofOptions.json",
+    keyFile: "./input/KeysMLDSA.json",
+    keyType: "mldsa87",
   },
-]
+];
 
 for (let testCase of testCases) {
   let fileName;
@@ -103,9 +103,7 @@ for (let testCase of testCases) {
   let status = await mkdir(baseDir, { recursive: true });
 
   let allKeys = JSON.parse(
-    await readFile(
-      new URL(testCase.keyFile, import.meta.url)
-    )
+    await readFile(new URL(testCase.keyFile, import.meta.url)),
   );
   const publicKeyMultibase = allKeys[testCase.keyType].publicKeyMultibase;
   let secretKey = hexToBytes(allKeys[testCase.keyType].secretKeyHex);
@@ -113,9 +111,7 @@ for (let testCase of testCases) {
 
   // Read input document from a file or just specify it right here.
   let document = JSON.parse(
-    await readFile(
-      new URL(testCase.inputFile, import.meta.url)
-    )
+    await readFile(new URL(testCase.inputFile, import.meta.url)),
   );
 
   // Signed Document Creation Steps:
@@ -124,30 +120,38 @@ for (let testCase of testCases) {
   let docCanon = await transform(document, testCase.canonScheme, testCase.hash);
   // Set proof options
   let proofOptions = JSON.parse(
-    await readFile(
-      new URL(testCase.proofOptionsFile, import.meta.url)
-    )
+    await readFile(new URL(testCase.proofOptionsFile, import.meta.url)),
   );
   // Must specify cryptosuite
   proofOptions.cryptosuite = testCase.cryptosuite;
   // Must provide verification methods related to public key
-  proofOptions.verificationMethod = 'did:key:' + publicKeyMultibase + '#'
-    + publicKeyMultibase;
+  proofOptions.verificationMethod =
+    "did:key:" + publicKeyMultibase + "#" + publicKeyMultibase;
 
   proofOptions["@context"] = document["@context"];
   // Proof Configuration
-  let proofCanon = await proofConfig(proofOptions, testCase.canonScheme, testCase.hash);
+  let proofCanon = await proofConfig(
+    proofOptions,
+    testCase.canonScheme,
+    testCase.hash,
+  );
 
   // Hashing
   let combinedHash = hashing(docCanon, proofCanon, testCase.hash);
   // As a check against common algorithm test vector output
-  fileName = baseDir + 'hashing-' + testCase.cryptosuite + '.txt';
-  writeFile(fileName, bytesToHex(combinedHash));
+  // fileName = baseDir + "hashing-" + testCase.cryptosuite + ".txt";
+  // writeFile(fileName, bytesToHex(combinedHash));
 
   // Sign
   let signature = testCase.sigFunc.sign(combinedHash, secretKey);
-  writeFile(baseDir + 'sigHex' + testCase.keyType.toUpperCase() + '.txt', bytesToHex(signature));
-  writeFile(baseDir + 'sigBase64url' + testCase.keyType.toUpperCase() + '.txt', base64url.encode(signature));
+  // writeFile(
+  //   baseDir + "sigHex" + testCase.keyType.toUpperCase() + ".txt",
+  //   bytesToHex(signature),
+  // );
+  // writeFile(
+  //   baseDir + "sigBase64url" + testCase.keyType.toUpperCase() + ".txt",
+  //   base64url.encode(signature),
+  // );
   // Verify (just to see we have a good private/public pair)
   let pbk = base58btc.decode(publicKeyMultibase);
   pbk = pbk.slice(2, pbk.length); // First two bytes are multi-format indicator
@@ -157,8 +161,11 @@ for (let testCase of testCases) {
 
   // Construct Signed Document
   let signedDocument = Object.assign({}, document);
-  delete proofOptions['@context'];
+  delete proofOptions["@context"];
   signedDocument.proof = proofOptions;
   signedDocument.proof.proofValue = base64url.encode(signature);
-  writeFile(baseDir + 'signed' + testCase.keyType.toUpperCase() + '.json', JSON.stringify(signedDocument, null, 2));
+  writeFile(
+    baseDir + "signed" + "-" + testCase.cryptosuite + ".json",
+    JSON.stringify(signedDocument, null, 2),
+  );
 }

@@ -4,7 +4,7 @@ This repository contains code to generate test vectors for the [Quantum-Safe Cry
 
 ## Use
 
-After cloning this repo and running `npm install`. You can then must run one of the *Create.js files prior to running the corresponding *Verify.js file. Test vectors will be place in a `./output` directory.
+After cloning this repo and running `npm install`. You can then must run one of the XCreate.js files prior to running the corresponding XVerify.js file. Test vectors will be place in a `./output` directory.
 
 ## Generic Functions
 
@@ -29,4 +29,4 @@ Note: This is early in the development cycle.
    2. Hashing (transformedDocument, canonicalProofConfig, hash function) returns hashData
    3. Proof Configuration (proofOptions, *rdfc* or *jcs*) returns canonicalProofConfig
    4. Proof Serialization (hashData, signature algorithm and parameters, private key) returns proofBytes
-   5. Proof Verification (public key, hashData, signature algorithm and parameters) returns verificationResult
+   5. Proof Verification (public key, hashData, signature algorithm and parameters) returns verificationResult.
