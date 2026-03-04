@@ -20,7 +20,6 @@ let testCases = [
     cryptosuite: "mldsa44-rdfc-2024",
     canonScheme: "rdfc",
     hash: "sha256",
-    outputDir: "./output/mldsa44-rdfc-2024/",
     inputFile: "./input/employmentAuth.json",
     proofOptionsFile: "./input/proofOptions.json",
     keyFile: "./input/KeysMLDSA.json",
@@ -30,7 +29,6 @@ let testCases = [
     cryptosuite: "mldsa44-jcs-2024",
     canonScheme: "jcs",
     hash: "sha256",
-    outputDir: "./output/mldsa44-jcs-2024/",
     inputFile: "./input/employmentAuth.json",
     proofOptionsFile: "./input/proofOptions.json",
     keyFile: "./input/KeysMLDSA.json",
@@ -40,7 +38,6 @@ let testCases = [
     cryptosuite: "mldsa65-rdfc-2024",
     canonScheme: "rdfc",
     hash: "sha384",
-    outputDir: "./output/mldsa65-rdfc-2024/",
     inputFile: "./input/employmentAuth.json",
     proofOptionsFile: "./input/proofOptions.json",
     keyFile: "./input/KeysMLDSA.json",
@@ -50,7 +47,6 @@ let testCases = [
     cryptosuite: "mldsa65-jcs-2024",
     canonScheme: "jcs",
     hash: "sha384",
-    outputDir: "./output/mldsa65-jcs-2024/",
     inputFile: "./input/employmentAuth.json",
     proofOptionsFile: "./input/proofOptions.json",
     keyFile: "./input/KeysMLDSA.json",
@@ -60,7 +56,6 @@ let testCases = [
     cryptosuite: "mldsa87-rdfc-2024",
     canonScheme: "rdfc",
     hash: "sha512",
-    outputDir: "./output/mldsa87-rdfc-2024/alumni/",
     inputFile: "./input/employmentAuth.json",
     proofOptionsFile: "./input/proofOptions.json",
     keyFile: "./input/KeysMLDSA.json",
@@ -70,8 +65,7 @@ let testCases = [
     cryptosuite: "mldsa87-jcs-2024",
     canonScheme: "jcs",
     hash: "sha512",
-    outputDir: "./output/mldsa87-jcs-2024/alumni/",
-    inputFile: "./input/unsigned.json",
+    inputFile: "./input/employmentAuth.json",
     proofOptionsFile: "./input/proofOptions.json",
     keyFile: "./input/KeysMLDSA.json",
     keyType: "mldsa87",
@@ -80,9 +74,7 @@ let testCases = [
 
 for (let testCase of testCases) {
   // Create output directory for the results
-  const baseDir = testCase.outputDir;
-  let status = await mkdir(baseDir, { recursive: true });
-  status = await mkdir(commonAlgDir, { recursive: true });
+  let status = await mkdir(commonAlgDir, { recursive: true });
 
   let allKeys = JSON.parse(
     await readFile(new URL(testCase.keyFile, import.meta.url)),
@@ -115,7 +107,7 @@ for (let testCase of testCases) {
   proofOptions.cryptosuite = testCase.cryptosuite;
   // Must provide verification methods related to public key
   proofOptions.verificationMethod =
-    "did:key:" + publicKeyMultibase + "#" + publicKeyMultibase;
+    "did:key:" + publicKeyMultibase;
 
   proofOptions["@context"] = document["@context"];
   // Proof Configuration

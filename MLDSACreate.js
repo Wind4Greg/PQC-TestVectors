@@ -125,7 +125,7 @@ for (let testCase of testCases) {
   proofOptions.cryptosuite = testCase.cryptosuite;
   // Must provide verification methods related to public key
   proofOptions.verificationMethod =
-    "did:key:" + publicKeyMultibase + "#" + publicKeyMultibase;
+    "did:key:" + publicKeyMultibase;
 
   proofOptions["@context"] = document["@context"];
   // Proof Configuration

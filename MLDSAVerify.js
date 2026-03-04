@@ -90,7 +90,7 @@ for (let testCase of testCases) {
   // );
 
   // Get public key
-  let encodedPbk = signedDocument.proof.verificationMethod.split("#")[1];
+  let encodedPbk = signedDocument.proof.verificationMethod.split("did:key:")[1];
   let pbk = base64url.decode(encodedPbk);
   pbk = pbk.slice(2, pbk.length); // First two bytes are multi-format indicator
   // console.log(`Public Key hex: ${bytesToHex(pbk)}, Length: ${pbk.length}`);

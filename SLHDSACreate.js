@@ -37,7 +37,7 @@ let testCases = [
     canonScheme: "rdfc",
     hash: "sha256",
     outputDir: "./output/slhdsa128-rdfc-2024/",
-    inputFile: "./input/unsigned.json",
+    inputFile: "./input/employmentAuth.json",
     proofOptionsFile: "./input/proofOptions.json",
     keyFile: "./input/KeysSLHDSA.json",
     keyType: "slh128s",
@@ -48,7 +48,7 @@ let testCases = [
     canonScheme: "jcs",
     hash: "sha256",
     outputDir: "./output/slhdsa128-jcs-2024/",
-    inputFile: "./input/unsigned.json",
+    inputFile: "./input/employmentAuth.json",
     proofOptionsFile: "./input/proofOptions.json",
     keyFile: "./input/KeysSLHDSA.json",
     keyType: "slh128s",
@@ -59,7 +59,7 @@ let testCases = [
     canonScheme: "rdfc",
     hash: "sha384",
     outputDir: "./output/slhdsa192-rdfc-2024/",
-    inputFile: "./input/unsigned.json",
+    inputFile: "./input/employmentAuth.json",
     proofOptionsFile: "./input/proofOptions.json",
     keyFile: "./input/KeysSLHDSA.json",
     keyType: "slh192s",
@@ -70,7 +70,7 @@ let testCases = [
     canonScheme: "jcs",
     hash: "sha384",
     outputDir: "./output/slhdsa192-jcs-2024/",
-    inputFile: "./input/unsigned.json",
+    inputFile: "./input/employmentAuth.json",
     proofOptionsFile: "./input/proofOptions.json",
     keyFile: "./input/KeysSLHDSA.json",
     keyType: "slh192s",
@@ -81,7 +81,7 @@ let testCases = [
     canonScheme: "rdfc",
     hash: "sha512",
     outputDir: "./output/slhdsa256-rdfc-2024/",
-    inputFile: "./input/unsigned.json",
+    inputFile: "./input/employmentAuth.json",
     proofOptionsFile: "./input/proofOptions.json",
     keyFile: "./input/KeysSLHDSA.json",
     keyType: "slh256s",
@@ -92,7 +92,7 @@ let testCases = [
     canonScheme: "jcs",
     hash: "sha512",
     outputDir: "./output/slhdsa256-jcs-2024/",
-    inputFile: "./input/unsigned.json",
+    inputFile: "./input/employmentAuth.json",
     proofOptionsFile: "./input/proofOptions.json",
     keyFile: "./input/KeysSLHDSA.json",
     keyType: "slh256s",
@@ -134,7 +134,7 @@ for (let testCase of testCases) {
   proofOptions.cryptosuite = testCase.cryptosuite;
   // Must provide verification methods related to public key
   proofOptions.verificationMethod =
-    "did:key:" + publicKeyMultibase + "#" + publicKeyMultibase;
+    "did:key:" + publicKeyMultibase;
 
   proofOptions["@context"] = document["@context"];
   // Proof Configuration
