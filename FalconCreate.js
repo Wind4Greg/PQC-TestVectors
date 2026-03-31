@@ -1,13 +1,10 @@
 /*
-ML-DSA test vector generation for both RDFC, JCS and multiple security strengths.
+FALCON test vector generation for both RDFC, JCS and multiple security strengths.
 
+| Name 	      | Security   |	Private Key |	Public Key | Signature |
+| FALCON-512  |	Category 1 |  1281        |	897 	     | 666       |
+| FALCON-1024 |	Category 5 |	2305        |	1793       | 1280      |
 FIPS 204 info:
-
-| Name     | Private Key | Public Key | Signature Size | Sec Strength |
-|----------|-------------|------------|----------------|--------------|
-|ML-DSA-44 | 2528        | 1312       | 2420           | Category 2   |
-|ML-DSA-65 | 4000        | 1952       | 3293           | Category 3   |
-|ML-DSA-87 | 4864        | 2592       | 4595           | Category 5   |
 
 Hash collision resistance strength:
 
@@ -23,75 +20,53 @@ import { mkdir, readFile, writeFile } from "fs/promises";
 import * as utils from "@noble/hashes/utils.js";
 const { bytesToHex, hexToBytes } = utils;
 import { proofConfig, transform, hashing } from "./DIUtils.js";
-import { ml_dsa44, ml_dsa65, ml_dsa87 } from "@noble/post-quantum/ml-dsa.js";
+import { falcon512, falcon1024 } from  "@noble/post-quantum/falcon.js";
 import { base64url } from "multiformats/bases/base64";
 
 let testCases = [
   {
-    cryptosuite: "mldsa44-rdfc-2024",
-    sigFunc: ml_dsa44,
+    cryptosuite: "falcon512-rdfc-2024",
+    sigFunc: falcon512,
     canonScheme: "rdfc",
     hash: "sha256",
-    outputDir: "./output/mldsa44-rdfc-2024/",
+    outputDir: "./output/falcon512-rdfc-2024/",
     inputFile: "./input/employmentAuth.json",
     proofOptionsFile: "./input/proofOptions.json",
-    keyFile: "./input/KeysMLDSA.json",
-    keyType: "mldsa44",
+    keyFile: "./input/KeysFALCON.json",
+    keyType: "falcon512",
   },
   {
-    cryptosuite: "mldsa44-jcs-2024",
-    sigFunc: ml_dsa44,
+    cryptosuite: "falcon512-jcs-2024",
+    sigFunc: falcon512,
     canonScheme: "jcs",
     hash: "sha256",
-    outputDir: "./output/mldsa44-jcs-2024/",
+    outputDir: "./output/falcon512-jcs-2024/",
     inputFile: "./input/employmentAuth.json",
     proofOptionsFile: "./input/proofOptions.json",
-    keyFile: "./input/KeysMLDSA.json",
-    keyType: "mldsa44",
+    keyFile: "./input/KeysFALCON.json",
+    keyType: "falcon512",
   },
   {
-    cryptosuite: "mldsa65-rdfc-2024",
-    sigFunc: ml_dsa65,
-    canonScheme: "rdfc",
-    hash: "sha384",
-    outputDir: "./output/mldsa65-rdfc-2024/",
-    inputFile: "./input/employmentAuth.json",
-    proofOptionsFile: "./input/proofOptions.json",
-    keyFile: "./input/KeysMLDSA.json",
-    keyType: "mldsa65",
-  },
-  {
-    cryptosuite: "mldsa65-jcs-2024",
-    sigFunc: ml_dsa65,
-    canonScheme: "jcs",
-    hash: "sha384",
-    outputDir: "./output/mldsa65-jcs-2024/",
-    inputFile: "./input/employmentAuth.json",
-    proofOptionsFile: "./input/proofOptions.json",
-    keyFile: "./input/KeysMLDSA.json",
-    keyType: "mldsa65",
-  },
-  {
-    cryptosuite: "mldsa87-rdfc-2024",
-    sigFunc: ml_dsa87,
+    cryptosuite: "falcon1024-rdfc-2024",
+    sigFunc: falcon1024,
     canonScheme: "rdfc",
     hash: "sha512",
-    outputDir: "./output/mldsa87-rdfc-2024/",
+    outputDir: "./output/falcon1024-rdfc-2024/",
     inputFile: "./input/employmentAuth.json",
     proofOptionsFile: "./input/proofOptions.json",
-    keyFile: "./input/KeysMLDSA.json",
-    keyType: "mldsa87",
+    keyFile: "./input/KeysFALCON.json",
+    keyType: "falcon1024",
   },
   {
-    cryptosuite: "mldsa87-jcs-2024",
-    sigFunc: ml_dsa87,
+    cryptosuite: "falcon1024-jcs-2024",
+    sigFunc: falcon1024,
     canonScheme: "jcs",
     hash: "sha512",
-    outputDir: "./output/mldsa87-jcs-2024/",
+    outputDir: "./output/falcon1024-jcs-2024/",
     inputFile: "./input/employmentAuth.json",
     proofOptionsFile: "./input/proofOptions.json",
-    keyFile: "./input/KeysMLDSA.json",
-    keyType: "mldsa87",
+    keyFile: "./input/KeysFALCON.json",
+    keyType: "falcon1024",
   },
 ];
 
@@ -157,6 +132,7 @@ for (let testCase of testCases) {
   // console.log(`Public Key hex: ${bytesToHex(pbk)}, Length: ${pbk.length}`);
   let result = testCase.sigFunc.verify(signature, combinedHash, pbk);
   console.log(`Signature verified: ${result}`);
+  console.log(`Signature size: ${signature.length}`);
 
   // Construct Signed Document
   let signedDocument = Object.assign({}, document);
