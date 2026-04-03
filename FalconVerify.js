@@ -3,7 +3,7 @@
 
 */
 import { readFile } from "fs/promises";
-import { falcon512, falcon1024 } from  "@noble/post-quantum/falcon.js";
+import { falcon512padded, falcon1024padded } from  "@noble/post-quantum/falcon.js";
 import { base64url } from "multiformats/bases/base64";
 import { proofConfig, transform, hashing } from "./DIUtils.js";
 import { bytesToHex } from "@noble/hashes/utils.js";
@@ -11,28 +11,28 @@ import { bytesToHex } from "@noble/hashes/utils.js";
 let testCases = [
   {
     cryptosuite: "falcon512-rdfc-2024",
-    sigFunc: falcon512,
+    sigFunc: falcon512padded,
     canonScheme: "rdfc",
     hash: "sha256",
     signedDoc: "./output/falcon512-rdfc-2024/signed-falcon512-rdfc-2024.json",
   },
   {
     cryptosuite: "falcon512-jcs-2024",
-    sigFunc: falcon512,
+    sigFunc: falcon512padded,
     canonScheme: "jcs",
     hash: "sha256",
     signedDoc: "./output/falcon512-jcs-2024/signed-falcon512-jcs-2024.json",
   },
   {
     cryptosuite: "falcon1024-rdfc-2024",
-    sigFunc: falcon1024,
+    sigFunc: falcon1024padded,
     canonScheme: "rdfc",
     hash: "sha512",
     signedDoc: "./output/falcon1024-rdfc-2024/signed-falcon1024-rdfc-2024.json",
   },
   {
     cryptosuite: "falcon1024-jcs-2024",
-    sigFunc: falcon1024,
+    sigFunc: falcon1024padded,
     canonScheme: "jcs",
     hash: "sha512",
     signedDoc: "./output/falcon1024-jcs-2024/signed-falcon1024-jcs-2024.json",

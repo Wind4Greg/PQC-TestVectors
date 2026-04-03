@@ -13,7 +13,7 @@
 */
 
 import { mkdir, readFile, writeFile } from "fs/promises";
-import { falcon512, falcon1024 } from  "@noble/post-quantum/falcon.js"
+import { falcon512padded, falcon1024padded } from  "@noble/post-quantum/falcon.js"
 import { randomBytes } from "@noble/post-quantum/utils.js";
 import * as utils from "@noble/hashes/utils.js";
 const { bytesToHex, concatBytes, equalBytes, hexToBytes } = utils;
@@ -48,8 +48,8 @@ const BYTE_PRE_FALCON_1024 = new Uint8Array([0xad, 0x24]);
 
 const baseDir = "./temp/";
 const seed1 = randomBytes(48); // seed is optional
-const keys512 = falcon512.keygen(seed1);
-const keys1024 = falcon1024.keygen(seed1);
+const keys512 = falcon512padded.keygen(seed1);
+const keys1024 = falcon1024padded.keygen(seed1);
 const allKeys = {
   falcon512: {
     publicKeyHex: bytesToHex(keys512.publicKey),
@@ -69,5 +69,6 @@ const allKeys = {
 
 writeFile(baseDir + "KeysFALCON.json", JSON.stringify(allKeys, null, 2));
 // const msg = new TextEncoder().encode('hello noble');
-// const sig = falcon512.sign(msg, keys512.secretKey);
-// const isValid = falcon512.verify(sig, msg, keys.publicKey);
+// const sig = falcon512padded.sign(msg, keys512.secretKey);
+// console.log(`Signature size: ${sig.length}`);
+// const isValid = falcon512padded.verify(sig, msg, keys512.publicKey);
